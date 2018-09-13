@@ -1,0 +1,12 @@
+###tmp file
+*KK
+
+#### Python
+*.pyc
+
+#### Eclipse and so on
+.project
+.cproject
+.pydevproject
+.classpath
+.idea
