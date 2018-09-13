@@ -32,7 +32,7 @@ from pyworkflow.em.viewers.chimera_utils import \
     createCoordinateAxisFile, runChimeraProgram, \
     getProgram
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
-from protocol_coot import (CootRefine, cootPdbTemplateFileName,
+from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
                            outpuDataBaseNameWithLabels, databaseTableName)
 
 # TODO: very likely this should inherit from ProtocolViewer

@@ -26,7 +26,7 @@
 
 import os
 import sys
-from protocol_refmac import CCP4ProtRunRefmac
+from ccp4.protocols import CCP4ProtRunRefmac
 from pyworkflow.protocol.params import LabelParam
 from pyworkflow.viewer import DESKTOP_TKINTER, WEB_DJANGO, ProtocolViewer
 from pyworkflow.gui.text import _open_cmd
