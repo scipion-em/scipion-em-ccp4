@@ -26,16 +26,19 @@
 
 import os
 import sys
-from ccp4.protocols import CCP4ProtRunRefmac
+from tkMessageBox import showerror
+
+from pyworkflow.em.headers import Ccp4Header
 from pyworkflow.protocol.params import LabelParam
 from pyworkflow.viewer import DESKTOP_TKINTER, WEB_DJANGO, ProtocolViewer
 from pyworkflow.gui.text import _open_cmd
 from pyworkflow.em.viewer import TableView
-from tkMessageBox import showerror
 from pyworkflow.gui.plotter import Plotter
-from pyworkflow.em.viewers.chimera_utils import \
-    createCoordinateAxisFile, runChimeraProgram, getProgram
-from pyworkflow.em.headers import Ccp4Header
+from pyworkflow.em.viewers.chimera_utils import (createCoordinateAxisFile,
+                                                 runChimeraProgram,
+                                                 getProgram)
+from ccp4.protocols import CCP4ProtRunRefmac
+
 
 def errorWindow(tkParent, msg):
     try:

@@ -23,30 +23,24 @@
 # *
 # **************************************************************************
 
-from ccp4.bibtex import _bibtex  # Load bibtex dict with references
 import os
-import pyworkflow.em as pwem
+import pyworkflow.em
 import pyworkflow.utils as pwutils
 import getpass
 
 from ccp4.constants import *
 
+_references = ['Winn_2011']
 _logo = "ccp4_200.png"
 
-#from protocol_coot import CootRefine
-#from viewer_coot import CootRefineViewer
-#from protocol_refmac import CCP4ProtRunRefmac
-#from viewer_refmac import CCP4ProtRunRefmacViewer
-_references = ['Winn_2011']
 
-
-class Plugin(pwem.Plugin):
+class Plugin(pyworkflow.em.Plugin):
     _homeVar = CCP4_HOME_VARNAME
-    _versions = {'CCP4': ['4.7.0.56']}
+    _versions = {'CCP4': [V7_0]}
 
     @classmethod
     def _defineVariables(cls):
-        cls._defineEmVar(CCP4_HOME_VARNAME, CCP4_HOME_DEFAULT)
+        cls._defineEmVar(CCP4_HOME_VARNAME, 'ccp4-7.0.056')
 
     @classmethod
     def getProgram(cls, progName):
@@ -55,13 +49,13 @@ class Plugin(pwem.Plugin):
                             os.path.basename(progName))
 
     @classmethod
-    def getEnviron(cls, ccp4First=True):
+    def getEnviron(cls):
         def deleteEnv(name):
             if name in os.environ:
                 os.environ.pop(name)
 
         environ = pwutils.Environ(os.environ)
-        pos = pwutils.Environ.BEGIN if ccp4First else pwutils.Environ.END
+        #pos = pwutils.Environ.BEGIN if ccp4First else pwutils.Environ.END
         _ccp4_home = cls.getHome()
         _ccp4_master, _dir = os.path.split(_ccp4_home)
         _username = getpass.getuser()
@@ -69,9 +63,10 @@ class Plugin(pwem.Plugin):
         deleteEnv("CCP4_MASTER")
 
         environ.update({
-            'PATH': os.path.join(_ccp4_home, 'bin'),
-            'LD_LIBRARY_PATH': os.path.join(_ccp4_home, 'lib')
-        }, position=pos)  # add to variable
+            'PATH': Plugin.getHome(),
+            'LD_LIBRARY_PATH': str.join(cls.getHome(), 'lib')
+                               + ":" + cls.getHome(),
+        }, position=pwutils.Environ.BEGIN)  # add to variable
 
         environ.update({
             # # CCP4_MASTER is the location of the top-level directory
@@ -148,29 +143,12 @@ class Plugin(pwem.Plugin):
         return environ
 
     @classmethod
-    def validateInstallation(cls):
-        """ This function will be used to check if package is properly installed."""
-
-        missingPaths = ["%s: %s" % (var, os.environ[var])
-                        for var in [CCP4_HOME_VARNAME]
-                        if not os.path.exists(os.environ[var])]
-
-        if missingPaths:
-            return ["Required software not found in the system:"] + missingPaths + \
-                   ["Try to install the package following: scipion install --help"]
-        else:
-            return []  # No errors
-
-    @classmethod
     def isVersionActive(cls):
         return cls.getActiveVersion().startswith(V7_0)
 
-
     @classmethod
     def defineBinaries(cls, env):
-        #env.addPackage('locscale', version='0.1',
-        #               tar='locscale-0.1.tgz',
-        #               default=True)
         pass
 
-pwem.Domain.registerPlugin(__name__)
+
+pyworkflow.em.Domain.registerPlugin(__name__)
