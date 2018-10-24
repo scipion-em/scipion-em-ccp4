@@ -28,12 +28,12 @@ import os
 import sqlite3
 
 from pyworkflow.em.convert import ImageHandler
-from pyworkflow.em.viewers.chimera_utils import \
-    createCoordinateAxisFile, runChimeraProgram, \
-    getProgram
+from pyworkflow.em.viewers.chimera_utils import (createCoordinateAxisFile,
+                                                 runChimeraProgram, getProgram)
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
 from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
-                           outpuDataBaseNameWithLabels, databaseTableName)
+                                          outpuDataBaseNameWithLabels,
+                                          databaseTableName)
 
 # TODO: very likely this should inherit from ProtocolViewer
 # not from XmippViewer. But then I get an empty form :-(

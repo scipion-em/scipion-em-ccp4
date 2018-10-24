@@ -33,7 +33,7 @@ TODO:
 
 import os
 import pyworkflow.utils as pwutils
-from . import Plugin
+from ccp4 import Plugin
 
 
 def runCCP4Program(program, args="", extraEnvDict=None, cwd=None):
@@ -47,9 +47,8 @@ def runCCP4Program(program, args="", extraEnvDict=None, cwd=None):
 def validVersion(major=7, minor=0.056, greater=True):
     """ Return ccp4 version as string. Example: 7.0.056"""
     print "validVersion"
-    if 'CCP4_HOME' not in os.environ:
-        return False
-    versionFileName = os.path.join(os.environ['CCP4_HOME'], 'lib',
+
+    versionFileName = os.path.join(Plugin.getHome(), 'lib',
                                    'ccp4','MAJOR_MINOR')
     with open(versionFileName,"r") as f:
         _major, _minor = f.readline().split(".",1)

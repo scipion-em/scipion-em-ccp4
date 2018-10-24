@@ -165,7 +165,7 @@ class CCP4ProtRunRefmac(EMProtocol):
         self.dict['XDim'] = x
         self.dict['YDim'] = y
         self.dict['ZDim'] = z
-        self.dict['CCP4_HOME'] = os.environ['CCP4_HOME']
+        self.dict['CCP4_HOME'] = Plugin.getHome()
         self.dict['REFMAC_BIN'] = Plugin.getProgram(self.REFMAC)
         self.dict['PDBSET_BIN'] = Plugin.getProgram(self.PDBSET)
         self.dict['PDBFILE'] = \
@@ -264,7 +264,7 @@ class CCP4ProtRunRefmac(EMProtocol):
             errors.append("and set REFMAC and CCP4_HOME variables properly.")
             if program is not None:
                 errors.append("Current values:")
-                errors.append("CCP4_HOME = %s" % os.environ['CCP4_HOME'])
+                errors.append("CCP4_HOME = %s" % Plugin.getHome())
                 errors.append("REFMAC = %s" % self.REFMAC)
 
         if not validVersion(7, 0.056):

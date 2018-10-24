@@ -311,7 +311,7 @@ the pdb file from coot  to scipion '
             errors.append("and set COOT and CCP4_HOME variables properly.")
             if program is not None:
                 errors.append("Current values:")
-                errors.append("CCP4_HOME = %s" % os.environ['CCP4_HOME'])
+                errors.append("CCP4_HOME = %s" % Plugin.getHome())
                 errors.append("COOT = %s" % self.COOT)
 
         if not validVersion(7, 0.056):
