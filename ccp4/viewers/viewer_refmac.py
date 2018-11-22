@@ -28,14 +28,14 @@ import os
 import sys
 from tkMessageBox import showerror
 
-from pyworkflow.em.headers import Ccp4Header
+from pyworkflow.em.convert import Ccp4Header
 from pyworkflow.protocol.params import LabelParam
 from pyworkflow.viewer import DESKTOP_TKINTER, WEB_DJANGO, ProtocolViewer
 from pyworkflow.gui.text import _open_cmd
-from pyworkflow.em.viewer import TableView
+from pyworkflow.em.viewers import TableView
 from pyworkflow.gui.plotter import Plotter
-from pyworkflow.em.viewers.chimera_utils import (createCoordinateAxisFile,
-                                                 runChimeraProgram,
+from pyworkflow.em.viewers.viewer_chimera import (createCoordinateAxisFile,
+                                                 runProgram,
                                                  getProgram)
 from ccp4.protocols import CCP4ProtRunRefmac
 
