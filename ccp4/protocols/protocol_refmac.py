@@ -29,7 +29,7 @@ import stat
 import pyworkflow.protocol.constants as const
 from pyworkflow import VERSION_1_2
 from pyworkflow.em.data import PdbFile
-from pyworkflow.em.headers import Ccp4Header
+from pyworkflow.em.convert.headers import Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
 from refmac_template_map2mtz import \
@@ -148,7 +148,7 @@ class CCP4ProtRunRefmac(EMProtocol):
         origin = fnVol.getOrigin(force=True).getShifts()
         sampling = fnVol.getSamplingRate()
         Ccp4Header.fixFile(inFileName, localInFileName, origin, sampling,
-                        START)
+                        Ccp4Header.START)
 
     def createDataDictStep(self):
         """ Precompute parameters to be used by refmac"""

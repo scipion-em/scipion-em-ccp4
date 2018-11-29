@@ -33,8 +33,8 @@ from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
 from pyworkflow.em.protocol import EMProtocol
 from pyworkflow.protocol.constants import STATUS_FINISHED
-from pyworkflow.protocol.params import MultiPointerParam, PointerParam, \
-    BooleanParam, StringParam
+from pyworkflow.protocol.params import (MultiPointerParam, PointerParam,
+                                        BooleanParam, StringParam)
 from pyworkflow.utils.properties import Message
 import sqlite3
 
