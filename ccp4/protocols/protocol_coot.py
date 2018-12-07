@@ -27,17 +27,14 @@ import os
 
 import pyworkflow.utils as pwutils
 from pyworkflow import VERSION_1_2
-from pyworkflow.em import PdbFile
-from pyworkflow.em import Volume
-from pyworkflow.em.convert import ImageHandler
-from pyworkflow.em.data import EMObject
-from pyworkflow.em.headers import Ccp4Header, START
+from pyworkflow.em.data import PdbFile, Volume, EMObject
+from pyworkflow.em.convert import ImageHandler, Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
 from pyworkflow.em.protocol import EMProtocol
 from pyworkflow.protocol.constants import STATUS_FINISHED
-from pyworkflow.protocol.params import MultiPointerParam, PointerParam, \
-    BooleanParam, StringParam
+from pyworkflow.protocol.params import (MultiPointerParam, PointerParam,
+                                        BooleanParam, StringParam)
 from pyworkflow.utils.properties import Message
 import sqlite3
 
