@@ -315,8 +315,10 @@ the pdb file from coot  to scipion '
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
+        print "inputVolumes_____________________", not self.inputVolumes
+        print "self.pdbFileToBeRefined.get().hasVolume()", self.pdbFileToBeRefined.get().hasVolume()
         if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                and self.inputVolumes is None:
+                and (not self.inputVolumes):
             errors.append("Error: You should provide a volume.\n")
 
         return errors
