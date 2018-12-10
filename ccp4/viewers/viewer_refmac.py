@@ -34,9 +34,7 @@ from pyworkflow.viewer import DESKTOP_TKINTER, WEB_DJANGO, ProtocolViewer
 from pyworkflow.gui.text import _open_cmd
 from pyworkflow.em.viewers import TableView
 from pyworkflow.gui.plotter import Plotter
-from pyworkflow.em.viewers.viewer_chimera import (createCoordinateAxisFile,
-                                                 runProgram,
-                                                 getProgram)
+from pyworkflow.em.viewers.viewer_chimera import Chimera
 from ccp4.protocols import CCP4ProtRunRefmac
 
 
@@ -396,7 +394,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
             #        (counter, x, y, z))
             f.close()
             # run in the background
-            runChimeraProgram(getProgram(), fnCmd + "&")
+            Chimera.runProgram(Chimera.getProgram(), fnCmd + "&")
             return []
         else:
             errorWindow(self.getTkRoot(), "This protocol has been executed "
@@ -413,7 +411,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
         else:
             dim = self.protocol.inputVolume.get().getDim()[0]
             sampling = self.protocol.inputVolume.get().getSamplingRate()
-        createCoordinateAxisFile(dim,
+        Chimera.createCoordinateAxisFile(dim,
                                  bildFileName=bildFileName,
                                  sampling=sampling)
         counter = 0
@@ -447,7 +445,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
 
         f.close()
         # run in the background
-        runChimeraProgram(getProgram(), fnCmd + "&")
+        Chimera.runProgram(Chimera.getProgram(), fnCmd + "&")
         return []
 
     def _visualizeFinalResults(self, e=None):

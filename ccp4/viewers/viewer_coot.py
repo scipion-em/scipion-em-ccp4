@@ -28,8 +28,7 @@ import os
 import sqlite3
 
 from pyworkflow.em.convert import ImageHandler
-from pyworkflow.em.viewers.viewer_chimera import (createCoordinateAxisFile,
-                                                 runProgram, getProgram)
+from pyworkflow.em.viewers.viewer_chimera import Chimera
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
 from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
                                           outpuDataBaseNameWithLabels,
@@ -64,7 +63,7 @@ class CootRefineViewer(Viewer):
                     getSamplingRate()
                 dims.append(dim)
                 samplings.append(sampling)
-        createCoordinateAxisFile(max(dims),
+        Chimera.createCoordinateAxisFile(max(dims),
                                  bildFileName=bildFileName,
                                  sampling=max(samplings))
         fnCmd = self.protocol._getTmpPath("chimera.cmd")
@@ -106,5 +105,5 @@ class CootRefineViewer(Viewer):
         f.close()
         conn.close()
         # run in the background
-        runChimeraProgram(getProgram(), fnCmd+"&")
+        Chimera.runProgram(Chimera.getProgram(), fnCmd+"&")
         return []
