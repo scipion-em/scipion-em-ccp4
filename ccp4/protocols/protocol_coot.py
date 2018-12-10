@@ -168,7 +168,7 @@ the pdb file from coot  to scipion '
                 Ccp4Header(norVolName).copyCCP4Header(
                     inVolName, inVol.getOrigin(
                                force=True).getShifts(),
-                               inVol.getSamplingRate(), originField=START)
+                               inVol.getSamplingRate(), originField=Ccp4Header.START)
 
     def runCootStep(self, inVolumes, norVolumesNames):
 
