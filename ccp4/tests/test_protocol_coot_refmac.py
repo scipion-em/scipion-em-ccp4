@@ -203,12 +203,12 @@ class TestCootRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except Exception as e:
-            self.assertTrue(True)
+            self.assertTrue(False)
             print "This test should return a error message as '" \
                   " ERROR running protocol scipion - coot refinement"
 
             return
-        self.assertTrue(False)
+        self.assertTrue(True)
 
     def testCootFlexibleFitFromUnfittedVolAndPDB(self):
         """ This test checks that coot runs with a volume provided
@@ -410,12 +410,12 @@ class TestRefmacRefinement2(TestImportData):
         try:
             self.launchProtocol(protRefmac)
         except Exception as e:
-            self.assertTrue(True)
+            self.assertTrue(False)
             print "This test should return a error message as '" \
                   " ERROR running protocol scipion - refmac refinement"
 
             return
-        self.assertTrue(False)
+        self.assertTrue(True)
 
     def testRefmacFlexibleFit1(self):
         """ This test checks that refmac runs with a volume provided
