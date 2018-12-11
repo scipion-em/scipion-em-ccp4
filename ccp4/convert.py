@@ -46,7 +46,6 @@ def runCCP4Program(program, args="", extraEnvDict=None, cwd=None):
 
 def validVersion(major=7, minor=0.056, greater=True):
     """ Return ccp4 version as string. Example: 7.0.056"""
-    print "validVersion"
 
     versionFileName = os.path.join(Plugin.getHome(), 'lib',
                                    'ccp4','MAJOR_MINOR')
