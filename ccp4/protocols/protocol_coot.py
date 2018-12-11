@@ -36,6 +36,7 @@ from pyworkflow.protocol.constants import STATUS_FINISHED
 from pyworkflow.protocol.params import (MultiPointerParam, PointerParam,
                                         BooleanParam, StringParam)
 from pyworkflow.utils.properties import Message
+from ccp4.constants import CCP4_BINARIES
 import sqlite3
 
 cootPdbTemplateFileName = "cootOut%04d.pdb"
@@ -52,7 +53,7 @@ the pdb file from coot  to scipion '
     _label = 'coot refinement'
     _program = ""
     _version = VERSION_1_2
-    COOT = 'coot'
+    COOT = CCP4_BINARIES['COOT']
     COOTINI='coot.ini'
 
     # --------------------------- DEFINE param functions -------------------
@@ -140,8 +141,7 @@ the pdb file from coot  to scipion '
                                  self.norVolumesNames,
                                  prerequisites=[convertId],
                                  interactive=self.doInteractive)
-        # self._insertFunctionStep('createOutputStep', inVolumes,
-        #                         norVolumesNames)
+
 
     # --------------------------- STEPS functions --------------------------
 
@@ -179,20 +179,23 @@ the pdb file from coot  to scipion '
 
         # if there is no database use pdb file from the form
         # otherwise use last created pdb file
-        databasePath = self._getTmpPath(outpuDataBaseNameWithLabels)
+        databasePath = self._getExtraPath(outpuDataBaseNameWithLabels)
         if not os.path.exists(databasePath):
             pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
         else:
             # open database
             conn = sqlite3.connect(databasePath)
-            c = conn.cursor()
+            # check tables exists
+            if not _checkTableExists(conn, databaseTableName):
+                 pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
+            else:
+                c = conn.cursor()
 
-            # read filename and label in a loop
-            c.execute(
-                'SELECT pdbFileName FROM %s order by id DESC limit 1' %
-                databaseTableName)
-            pdbFileToBeRefined = c.fetchone()[0]
-            print "pdbFileToBeRefinedpdbFileToBeRefined", pdbFileToBeRefined
+                # read filename and label in a loop
+                c.execute(
+                    'SELECT pdbFileName FROM %s order by id DESC limit 1' %
+                    databaseTableName)
+                pdbFileToBeRefined = c.fetchone()[0]
 
         listOfPDBs.append(pdbFileToBeRefined)
         for pdb in self.inputPdbFiles:
@@ -232,13 +235,16 @@ the pdb file from coot  to scipion '
         databasePath = self._getExtraPath(outpuDataBaseNameWithLabels)
         # open database
         conn = sqlite3.connect(databasePath)
+        if not _checkTableExists(conn, databaseTableName):
+            conn.close()
+            return
+
         c = conn.cursor()
 
         # read filename and label in a loop
         c.execute('SELECT pdbFileName, pdbLabelName FROM %s where saved = 0' %
                   databaseTableName)
         for row in c:
-            print "output", row[0], row[1]
             pdbFileName = row[0]
             pdbLabelName = row[1]
             pdb = PdbFile()
@@ -295,30 +301,16 @@ the pdb file from coot  to scipion '
     def _validate(self):
         errors = []
         # Check that the program exists
-        program = Plugin.getProgram(self.COOT)
-        if program is None:
-            errors.append("Missing variables COOT and/or CCP4_HOME")
-        elif not os.path.exists(program):
-            errors.append("Binary '%s' does not exists.\n" % program)
-
-        # If there is any error at this point it is related to config variables
-        if errors:
-            errors.append("Check configuration file: "
-                          "~/.config/scipion/scipion.conf")
-            errors.append("and set COOT and CCP4_HOME variables properly.")
-            if program is not None:
-                errors.append("Current values:")
-                errors.append("CCP4_HOME = %s" % Plugin.getHome())
-                errors.append("COOT = %s" % self.COOT)
+        error, message = Plugin.checkBinaries(self.COOT)
+        if not error:
+            errors.append(message)
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
-        print "inputVolumes_____________________", not self.inputVolumes
-        print "self.pdbFileToBeRefined.get().hasVolume()", self.pdbFileToBeRefined.get().hasVolume()
         if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                and (not self.inputVolumes):
+                and self.inputVolumes is None:
             errors.append("Error: You should provide a volume.\n")
 
         return errors
@@ -595,3 +587,18 @@ aa_auxiliary_chain: AA
 aaNumber: 100
 step: 10
 """)
+
+def _checkTableExists(dbcon, tablename):
+    dbcur = dbcon.cursor()
+    dbcur.execute("""
+        SELECT COUNT(*)
+        FROM sqlite_master
+        WHERE type='table'
+         AND name='%s'
+        """%tablename)
+    if dbcur.fetchone()[0] == 1:
+        dbcur.close()
+        return True
+
+    dbcur.close()
+    return False
