@@ -148,7 +148,25 @@ class Plugin(pyworkflow.em.Plugin):
 
     @classmethod
     def defineBinaries(cls, env):
-        pass
+        """ Check that binaries are available. Since we do not install them
+        this function just check that they exist"""
+
+        for k, v in CCP4_BINARIES.iteritems():
+            installed, message = cls.checkBinaries(v)
+            if not installed:
+                print "***********ERROR****************"
+                print message
+                print "********************************"
+
+    @classmethod
+    def checkBinaries(cls, programName):
+        """ Check that this binary is available"""
+
+        if not os.path.exists(cls.getProgram(programName)):
+            return False, "Binary file %s does not exists. " \
+                      "Please, install CCP4 software suite (see %s)" % (programName, CCP4_URL)
+        else:
+            return True, ""
 
 
 pyworkflow.em.Domain.registerPlugin(__name__)
