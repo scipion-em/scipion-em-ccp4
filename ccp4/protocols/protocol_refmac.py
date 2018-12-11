@@ -39,7 +39,7 @@ from refmac_template_refine \
 from pyworkflow.em.protocol import EMProtocol
 from pyworkflow.protocol.params import PointerParam, IntParam, FloatParam, \
     BooleanParam, StringParam
-
+from ccp4.constants import CCP4_BINARIES
 
 class CCP4ProtRunRefmac(EMProtocol):
     """ generates files for volumes and FSCs to submit structures to EMDB
@@ -53,8 +53,8 @@ class CCP4ProtRunRefmac(EMProtocol):
     createMaskLogFileName = "mask.log"
     refineLogFileName = "refine.log"
 
-    REFMAC = 'refmac5'
-    PDBSET = 'pdbset'
+    REFMAC = CCP4_BINARIES['REFMAC']
+    PDBSET = CCP4_BINARIES['PDBSET']
 
     def __init__(self, **kwargs):
         EMProtocol.__init__(self, **kwargs)
@@ -250,21 +250,13 @@ class CCP4ProtRunRefmac(EMProtocol):
 
     def _validate(self):
         errors = []
-        # Check that the program exists
-        program = Plugin.getProgram(self.REFMAC)
-        if program is None:
-            errors.append("Missing variables REFMAC and/or CCP4_HOME")
-        elif not os.path.exists(program):
-            errors.append("Binary '%s' does not exists.\n" % program)
-        # If there is any error at this point it is related to config variables
-        if errors:
-            errors.append("Check configuration file: "
-                          "~/.config/scipion/scipion.conf")
-            errors.append("and set REFMAC and CCP4_HOME variables properly.")
-            if program is not None:
-                errors.append("Current values:")
-                errors.append("CCP4_HOME = %s" % Plugin.getHome())
-                errors.append("REFMAC = %s" % self.REFMAC)
+        # Check that the programs exist
+        error, message = Plugin.checkBinaries(self.REFMAC)
+        if not error:
+            errors.append(message)
+        error, message = Plugin.checkBinaries(self.PDBSET)
+        if not error:
+            errors.append(message)
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
