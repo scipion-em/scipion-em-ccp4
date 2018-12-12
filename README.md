@@ -7,5 +7,5 @@ TUTORIAL:
 https://github.com/I2PC/scipion/wiki/User-Documentation#tutorials
 
 INSTALLATION:
-see wiki
+see wiki (https://github.com/scipion-em/scipion-em-ccp4/wiki)
 
