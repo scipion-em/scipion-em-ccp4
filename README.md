@@ -9,3 +9,6 @@ https://github.com/I2PC/scipion/wiki/User-Documentation#tutorials
 INSTALLATION:
 see wiki (https://github.com/scipion-em/scipion-em-ccp4/wiki)
 
+Build status:
+
+.. image:: http://heisenberg.cnb.csic.es:9980/badges/ccp4_devel.svg
