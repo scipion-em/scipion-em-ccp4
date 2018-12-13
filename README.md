@@ -12,3 +12,5 @@ see wiki (https://github.com/scipion-em/scipion-em-ccp4/wiki)
 Build status:
 
 .. image:: http://heisenberg.cnb.csic.es:9980/badges/ccp4_devel.svg
+.. image:: http://heisenberg.cnb.csic.es:9980/badges/chimera_devel.svg
+
