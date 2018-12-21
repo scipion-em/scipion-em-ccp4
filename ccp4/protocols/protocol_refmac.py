@@ -28,7 +28,7 @@ import os
 import stat
 import pyworkflow.protocol.constants as const
 from pyworkflow import VERSION_1_2
-from pyworkflow.em.data import PdbFile
+from pyworkflow.em.data import AtomStruct 
 from pyworkflow.em.convert.headers import Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
@@ -68,7 +68,7 @@ class CCP4ProtRunRefmac(EMProtocol):
                       help='This is the unit cell volume.')
         form.addParam('inputStructure', PointerParam, label="Input PDBx/mmCIF "
                                                             "file",
-                      important=True, pointerClass='PdbFile',
+                      important=True, pointerClass='AtomStruct',
                       help='Specify a PDBx/mmCIF object.')
         form.addParam('maxResolution', FloatParam, default=5,
                       label='Max. Resolution (A):',
@@ -230,7 +230,7 @@ class CCP4ProtRunRefmac(EMProtocol):
                        cwd=self._getExtraPath())
 
     def createRefmacOutputStep(self):
-        pdb = PdbFile()
+        pdb = AtomStruct()
         pdb.setFileName(self._getOutPdbFileName(self.OutPdbFileName))
         self._defineOutputs(outputPdb=pdb)
         self._defineSourceRelation(self.inputStructure, self.outputPdb)
