@@ -27,7 +27,7 @@ import os
 
 import pyworkflow.utils as pwutils
 from pyworkflow import VERSION_1_2
-from pyworkflow.em.data import PdbFile, Volume, EMObject
+from pyworkflow.em.data import AtomStruct, Volume, EMObject
 from pyworkflow.em.convert import ImageHandler, Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
@@ -69,12 +69,12 @@ the pdb file from coot  to scipion '
                            '*always normalize your particles* if the maximum '
                            'value is higher than 1.')
         form.addParam('pdbFileToBeRefined', PointerParam,
-                      pointerClass="PdbFile",
+                      pointerClass="AtomStruct",
                       label='PDB to be refined',
                       help="PDB file to be refined. This PDB object, "
                            "after refinement, will be saved")
         form.addParam('inputPdbFiles', MultiPointerParam,
-                      pointerClass="PdbFile",
+                      pointerClass="AtomStruct",
                       label='Other referece PDBs',
                       help="Other PDB files used as reference. These PDB "
                            "objects will not be saved")
@@ -247,7 +247,7 @@ the pdb file from coot  to scipion '
         for row in c:
             pdbFileName = row[0]
             pdbLabelName = row[1]
-            pdb = PdbFile()
+            pdb = AtomStruct()
             pdb.setFileName(pdbFileName)
             outputs = {str(pdbLabelName) : pdb}
             self._defineOutputs(**outputs)
