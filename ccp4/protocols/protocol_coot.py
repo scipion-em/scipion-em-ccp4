@@ -27,7 +27,11 @@ import os
 
 import pyworkflow.utils as pwutils
 from pyworkflow import VERSION_1_2
-from pyworkflow.em.data import AtomStruct, Volume, EMObject
+from pyworkflow.em.data import Volume, EMObject
+try:
+    from pyworkflow.em.data import AtomStruct
+except:
+    from pyworkflow.em.data import PdbFile as AtomStruct
 from pyworkflow.em.convert import ImageHandler, Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
