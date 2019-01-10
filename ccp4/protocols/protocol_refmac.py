@@ -69,10 +69,10 @@ class CCP4ProtRunRefmac(EMProtocol):
         form.addParam('inputVolume', PointerParam, label="Input Volume",
                       allowsNull=True, pointerClass='Volume',
                       help='This is the unit cell volume.')
-        form.addParam('inputStructure', PointerParam, label="Input PDBx/mmCIF "
-                                                            "file",
+        form.addParam('inputStructure', PointerParam,
+                      label='Atomic structure to be refined',
                       important=True, pointerClass='AtomStruct',
-                      help='Specify a PDBx/mmCIF object.')
+                      help='Specify a PDBx/mmCIF object to be refined.')
         form.addParam('maxResolution', FloatParam, default=5,
                       label='Max. Resolution (A):',
                       help="Max resolution used in the refinement (Angstroms)."

@@ -74,13 +74,13 @@ the pdb file from coot  to scipion '
                            'value is higher than 1.')
         form.addParam('pdbFileToBeRefined', PointerParam,
                       pointerClass="AtomStruct",
-                      label='PDB to be refined',
-                      help="PDB file to be refined. This PDB object, "
-                           "after refinement, will be saved")
+                      label='Atomic structure to be refined',
+                      help="PDBx/mmCIF file to be refined. This PDBx/mmCIF object "
+                           "will be saved after refinement, will be saved")
         form.addParam('inputPdbFiles', MultiPointerParam,
                       pointerClass="AtomStruct",
-                      label='Other referece PDBs',
-                      help="Other PDB files used as reference. These PDB "
+                      label='Other reference atomic structures',
+                      help="Other PDBx/mmCIF files used as reference. These PDBx/mmCIF "
                            "objects will not be saved")
         form.addParam('extraCommands', StringParam,
                       default='',
