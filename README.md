@@ -1,4 +1,7 @@
-Programs from CCP4 used for model building in electronmicroscopy
+Programs from CCP4 used for model building in electronmicroscopy:
+
+  * coot
+  * refmac
 
 TEST:
 ./scipion test ccp4.tests.test_protocol_coot_refmac
