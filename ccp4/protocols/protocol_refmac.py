@@ -252,16 +252,10 @@ class CCP4ProtRunRefmac(EMProtocol):
     # --------------------------- UTLIS functions --------------------------
 
     def _validate(self):
-        errors = []
-        # Check that the programs exist
-        error, message = Plugin.checkBinaries(self.REFMAC)
-        if not error:
-            errors.append(message)
-        error, message = Plugin.checkBinaries(self.PDBSET)
-        if not error:
-            errors.append(message)
 
-        if not validVersion(7, 0.056):
+        errors = []
+
+        if validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
@@ -270,9 +264,26 @@ class CCP4ProtRunRefmac(EMProtocol):
 
         return errors
 
+    @classmethod
+    def validateInstallation(cls):
+
+        errors = []
+        # Check that the programs exist
+        installed, message = Plugin.checkBinaries(cls.REFMAC)
+        if not installed:
+            errors.append(message)
+        installed, message = Plugin.checkBinaries(cls.PDBSET)
+        if not installed:
+            errors.append(message)
+
+        return errors
+
     def _getInputVolume(self):
         if self.inputVolume.get() is None:
-            fnVol = self.inputStructure.get().getVolume()
+            if self.inputStructure.get() is None:
+                fnVol = None
+            else:
+                fnVol = self.inputStructure.get().getVolume()
         else:
             fnVol = self.inputVolume.get()
         return fnVol

@@ -49,6 +49,10 @@ def validVersion(major=7, minor=0.056, greater=True):
 
     versionFileName = os.path.join(Plugin.getHome(), 'lib',
                                    'ccp4','MAJOR_MINOR')
+
+    if not os.path.exists(versionFileName):
+        return False
+
     with open(versionFileName,"r") as f:
         _major, _minor = f.readline().split(".",1)
         _major = int(_major)

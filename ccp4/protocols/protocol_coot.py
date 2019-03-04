@@ -303,21 +303,29 @@ the pdb file from coot  to scipion '
 
     # --------------------------- INFO functions ---------------------------
     def _validate(self):
+
         errors = []
-        # Check that the program exists
-        error, message = Plugin.checkBinaries(self.COOT)
-        if not error:
-            errors.append(message)
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
-        if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                and self.inputVolumes is None:
-            errors.append("Error: You should provide a volume.\n")
+        if self.pdbFileToBeRefined.hasValue():
+            if (not self.pdbFileToBeRefined.get().hasVolume()) \
+                    and self.inputVolumes.isEmpty():
+                errors.append("Error: You should provide a volume.\n")
 
         return errors
+
+    @classmethod
+    def validateInstallation(cls):
+
+        # Check that the programs exist
+        installed, message = Plugin.checkBinaries(cls.COOT)
+        if not installed:
+            return [message]
+        else:
+            return []
 
     def _summary(self):
         #  Think on how to update this summary with created PDB
