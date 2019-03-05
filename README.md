@@ -14,5 +14,5 @@ see wiki (https://github.com/scipion-em/scipion-em-ccp4/wiki)
 
 ![alt text](http://arquimedes.cnb.csic.es:9980/badges/ccp4_devel.svg)
 
-Builbot_URL: http://archimedes.cnb.csic.es:9980/#/builders/32
+Builbot_URL: http://archimedes.cnb.csic.es:9980/#/builders/49
 
