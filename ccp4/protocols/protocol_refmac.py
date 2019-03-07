@@ -255,7 +255,7 @@ class CCP4ProtRunRefmac(EMProtocol):
 
         errors = []
 
-        if validVersion(7, 0.056):
+        if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
