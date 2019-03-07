@@ -28,7 +28,10 @@ import os
 import stat
 import pyworkflow.protocol.constants as const
 from pyworkflow import VERSION_1_2
-from pyworkflow.em.data import PdbFile
+try:
+    from pyworkflow.em.data import AtomStruct
+except:
+    from pyworkflow.em.data import PdbFile as AtomStruct
 from pyworkflow.em.convert.headers import Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
@@ -66,10 +69,10 @@ class CCP4ProtRunRefmac(EMProtocol):
         form.addParam('inputVolume', PointerParam, label="Input Volume",
                       allowsNull=True, pointerClass='Volume',
                       help='This is the unit cell volume.')
-        form.addParam('inputStructure', PointerParam, label="Input PDBx/mmCIF "
-                                                            "file",
-                      important=True, pointerClass='PdbFile',
-                      help='Specify a PDBx/mmCIF object.')
+        form.addParam('inputStructure', PointerParam,
+                      label='Atomic structure to be refined',
+                      important=True, pointerClass='AtomStruct',
+                      help='Specify a PDBx/mmCIF object to be refined.')
         form.addParam('maxResolution', FloatParam, default=5,
                       label='Max. Resolution (A):',
                       help="Max resolution used in the refinement (Angstroms)."
@@ -230,7 +233,7 @@ class CCP4ProtRunRefmac(EMProtocol):
                        cwd=self._getExtraPath())
 
     def createRefmacOutputStep(self):
-        pdb = PdbFile()
+        pdb = AtomStruct()
         pdb.setFileName(self._getOutPdbFileName(self.OutPdbFileName))
         self._defineOutputs(outputPdb=pdb)
         self._defineSourceRelation(self.inputStructure, self.outputPdb)
@@ -249,14 +252,8 @@ class CCP4ProtRunRefmac(EMProtocol):
     # --------------------------- UTLIS functions --------------------------
 
     def _validate(self):
+
         errors = []
-        # Check that the programs exist
-        error, message = Plugin.checkBinaries(self.REFMAC)
-        if not error:
-            errors.append(message)
-        error, message = Plugin.checkBinaries(self.PDBSET)
-        if not error:
-            errors.append(message)
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
@@ -267,9 +264,26 @@ class CCP4ProtRunRefmac(EMProtocol):
 
         return errors
 
+    @classmethod
+    def validateInstallation(cls):
+
+        errors = []
+        # Check that the programs exist
+        installed, message = Plugin.checkBinaries(cls.REFMAC)
+        if not installed:
+            errors.append(message)
+        installed, message = Plugin.checkBinaries(cls.PDBSET)
+        if not installed:
+            errors.append(message)
+
+        return errors
+
     def _getInputVolume(self):
         if self.inputVolume.get() is None:
-            fnVol = self.inputStructure.get().getVolume()
+            if self.inputStructure.get() is None:
+                fnVol = None
+            else:
+                fnVol = self.inputStructure.get().getVolume()
         else:
             fnVol = self.inputVolume.get()
         return fnVol

@@ -27,7 +27,11 @@ import os
 
 import pyworkflow.utils as pwutils
 from pyworkflow import VERSION_1_2
-from pyworkflow.em.data import PdbFile, Volume, EMObject
+from pyworkflow.em.data import Volume, EMObject
+try:
+    from pyworkflow.em.data import AtomStruct
+except:
+    from pyworkflow.em.data import PdbFile as AtomStruct
 from pyworkflow.em.convert import ImageHandler, Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
@@ -69,14 +73,14 @@ the pdb file from coot  to scipion '
                            '*always normalize your particles* if the maximum '
                            'value is higher than 1.')
         form.addParam('pdbFileToBeRefined', PointerParam,
-                      pointerClass="PdbFile",
-                      label='PDB to be refined',
-                      help="PDB file to be refined. This PDB object, "
-                           "after refinement, will be saved")
+                      pointerClass="AtomStruct",
+                      label='Atomic structure to be refined',
+                      help="PDBx/mmCIF file to be refined. This PDBx/mmCIF object "
+                           "will be saved after refinement, will be saved")
         form.addParam('inputPdbFiles', MultiPointerParam,
-                      pointerClass="PdbFile",
-                      label='Other referece PDBs',
-                      help="Other PDB files used as reference. These PDB "
+                      pointerClass="AtomStruct",
+                      label='Other reference atomic structures',
+                      help="Other PDBx/mmCIF files used as reference. These PDBx/mmCIF "
                            "objects will not be saved")
         form.addParam('extraCommands', StringParam,
                       default='',
@@ -247,7 +251,7 @@ the pdb file from coot  to scipion '
         for row in c:
             pdbFileName = row[0]
             pdbLabelName = row[1]
-            pdb = PdbFile()
+            pdb = AtomStruct()
             pdb.setFileName(pdbFileName)
             outputs = {str(pdbLabelName) : pdb}
             self._defineOutputs(**outputs)
@@ -299,21 +303,29 @@ the pdb file from coot  to scipion '
 
     # --------------------------- INFO functions ---------------------------
     def _validate(self):
+
         errors = []
-        # Check that the program exists
-        error, message = Plugin.checkBinaries(self.COOT)
-        if not error:
-            errors.append(message)
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
         # Check that the input volume exist
-        if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                and self.inputVolumes is None:
-            errors.append("Error: You should provide a volume.\n")
+        if self.pdbFileToBeRefined.hasValue():
+            if (not self.pdbFileToBeRefined.get().hasVolume()) \
+                    and self.inputVolumes.isEmpty():
+                errors.append("Error: You should provide a volume.\n")
 
         return errors
+
+    @classmethod
+    def validateInstallation(cls):
+
+        # Check that the programs exist
+        installed, message = Plugin.checkBinaries(cls.COOT)
+        if not installed:
+            return [message]
+        else:
+            return []
 
     def _summary(self):
         #  Think on how to update this summary with created PDB
