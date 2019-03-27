@@ -133,8 +133,8 @@ class CCP4ProtRunRefmac(EMProtocol):
         self._insertFunctionStep('executeRefineRefmacStep')
         self._insertFunctionStep('createRefmacOutputStep')  # create output
         #                                                     pdb file
-        self._insertFunctionStep('writeFinalResultsTableStep')  # Print output
-        #                                                         results
+        # self._insertFunctionStep('writeFinalResultsTableStep')  # Print output
+        # #                                                         results
 
     # --------------------------- STEPS functions ---------------------------
     def convertInputStep(self):
@@ -240,14 +240,14 @@ class CCP4ProtRunRefmac(EMProtocol):
         fnVol = self._getInputVolume()
         self._defineSourceRelation(fnVol, self.outputPdb)
 
-    def writeFinalResultsTableStep(self):
-        with open(self._getlogFileName()) as input_data:
-            for line in input_data:
-                if line.strip() == '$TEXT:Result: $$ Final results $$':
-                    break
-            for line in input_data:
-                if line.strip() == '$$':
-                    break
+    # def writeFinalResultsTableStep(self):
+    #     with open(self._getlogFileName()) as input_data:
+    #         for line in input_data:
+    #             if line.strip() == '$TEXT:Result: $$ Final results $$':
+    #                 break
+    #         for line in input_data:
+    #             if line.strip() == '$$':
+    #                 break
 
     # --------------------------- UTLIS functions --------------------------
 
@@ -308,12 +308,53 @@ class CCP4ProtRunRefmac(EMProtocol):
     def _citations(self):
         return ['Vagin_2004']
 
+    def _parseFinalResults(self, refineLogFileName):
+        self.finalResults = []
+        with open(refineLogFileName, "r") as filePointer:
+            line = filePointer.readline()
+            while line:
+                line = filePointer.readline()
+                words = line.strip().split()
+                if len(words) > 1:
+                    if (words[0] == '$TEXT:Result:' and words[1] == '$$'):
+                        line = filePointer.readline()
+                        for i in range(4):
+                            line = filePointer.readline()
+                            words = line.strip().split()
+                            self.finalResults.append(words[2])
+                            self.finalResults.append(words[3])
+
     def _summary(self):
         summary = []
         summary.append('refmac '
                        'keywords: '
                        'https://www2.mrc-lmb.cam.ac.uk/groups/murshudov'
                        '/content/refmac/refmac_keywords.html')
+        try:
+            refineLogFileName = self._getlogFileName()
+            self._parseFinalResults(refineLogFileName)
+            summary.append("Refmac results:         Initial             "
+                           "Final")
+            summary.append("R factor:                  %0.4f           %0.4f"
+                           "    (Goal: ~ 0.3)"
+                           % (float(self.finalResults[0]),
+                              float(self.finalResults[1]))
+                           )
+            summary.append("Rms BondLength:    %0.4f           %0.4f    ("
+                           "Goal: ~ 0.02)"
+                           % (float(self.finalResults[2]),
+                              float(self.finalResults[3]))
+                           )
+            summary.append("Rms BondAngle:      %0.4f          %0.4f"
+                           % (float(self.finalResults[4]),
+                              float(self.finalResults[5]))
+                           )
+            summary.append("Rms ChirVolume:    %0.4f           %0.4f"
+                           % (float(self.finalResults[6]),
+                              float(self.finalResults[7]))
+                           )
+        except:
+            summary.append("Refmac results are not yet computed")
         return summary
 
     def _getMapMaskedByPdbBasedMaskFileName(self, baseFileName='mapMaskedByPdbBasedMask.mrc'):
