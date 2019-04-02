@@ -14,7 +14,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 # Arguments marked as "Required" below must be included for upload to PyPI.
@@ -97,7 +97,7 @@ setup(
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords='scipion cryoem imageprocessing scipion-1.2',  # Optional
+    keywords='scipion cryoem imageprocessing scipion-2.0',  # Optional
 
     # You can just specify package directories manually here if your project is
     # simple. Or you can use find_packages().
