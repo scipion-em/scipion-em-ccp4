@@ -1,4 +1,4 @@
-Programs from CCP4 used for model building in electronmicroscopy:
+PPrograms from CCP4 used for model building in electronmicroscopy:
 
   * coot
   * refmac
