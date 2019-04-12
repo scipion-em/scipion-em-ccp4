@@ -31,7 +31,7 @@ Alternatively, in devel mode:
 
     scipion installp -p local/path/to/scipion-em-powerfit --devel
 
-
+.. image:: http://arquimedes.cnb.csic.es:9980/badges/grigoriefflab_devel.svg
 
 ![alt text](http://arquimedes.cnb.csic.es:9980/badges/ccp4_devel.svg)
 
