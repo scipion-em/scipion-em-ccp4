@@ -45,7 +45,7 @@ OR
 
 - **Binary files** 
 
-CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recomend to install CCP4 version 7.0.056 or higher.
+CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recommend to install CCP4 version 7.0.056 or higher.
 
 
 
@@ -69,7 +69,7 @@ To check the installation, simply run the following Scipion test:
 Protocols
 ========
 
-* coot refinement: Molecular graphics application used for flexible fitting and refinement of structures of macromolecules regarding electron density maps. See the `details <https://www2.mrc-lmb.cam.ac.uk/personal/pemsley/coot/>`_ of *Coot* utilities. 
+* coot refinement: Molecular interactive graphics application used for flexible fitting, refinement, model completion, and validation of structures of macromolecules regarding electron density maps. See the `details <https://www2.mrc-lmb.cam.ac.uk/personal/pemsley/coot/>`_ of *Coot* utilities. 
 * refmac: Automatic refinement program in Fourier space of macromolecule structures regarding electron density maps. See the `details <http://www.ccp4.ac.uk/html/refmac5/description.html>`_ of *Refmac* utilities.
 
 
