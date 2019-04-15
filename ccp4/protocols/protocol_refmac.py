@@ -45,7 +45,9 @@ from pyworkflow.protocol.params import PointerParam, IntParam, FloatParam, \
 from ccp4.constants import CCP4_BINARIES
 
 class CCP4ProtRunRefmac(EMProtocol):
-    """ generates files for volumes and FSCs to submit structures to EMDB
+    """ Automatic refinement program in Fourier space of macromolecule
+    structures regarding electron density maps. Generates files for
+    volumes and FSCs to submit structures to EMDB
     """
     _label = 'refmac'
     _program = ""
