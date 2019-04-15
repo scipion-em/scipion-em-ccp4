@@ -1,3 +1,7 @@
+================================
+CCP4 scipion plugin
+================================
+
 PPrograms from CCP4 used for model building in electronmicroscopy:
 
   * coot
