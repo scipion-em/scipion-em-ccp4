@@ -38,7 +38,8 @@ OR
 2. Install:
 
 .. code-block::
-scipion installp -p path_to_scipion-em-chimera --devel
+
+           scipion installp -p path_to_scipion-em-ccp4 --devel
 
 
 
