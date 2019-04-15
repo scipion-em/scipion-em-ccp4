@@ -65,7 +65,7 @@ setup(
 
     # This should be your name or the name of the organization which owns the
     # project.
-    author='I2PC',  # Optional
+    author='I2PC, Roberto Marabini and Marta Martinez',  # Optional
 
     # This should be a valid email address corresponding to the author listed
     # above.
