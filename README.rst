@@ -63,7 +63,9 @@ To check the installation, simply run the following Scipion test:
 
 7.0.056 or higher.
 
+- **Additional Instruction**
 
+see https://github.com/scipion-em/scipion-em-ccp4/wiki
 
 ========
 Protocols
