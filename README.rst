@@ -63,7 +63,9 @@ To check the installation, simply run the following Scipion test:
 
 7.0.056 or higher.
 
+- **Additional Instruction**
 
+see https://github.com/scipion-em/scipion-em-ccp4/wiki
 
 ========
 Protocols
@@ -90,9 +92,9 @@ Buildbot status
 
 Status devel version: 
 
-.. image:: http://arquimedes.cnb.csic.es:9980/badges/ccp4_devel.svg
+.. image:: http://scipion-test.cnb.csic.es:9980/badges/ccp4_devel.svg
 
 Status production version: 
 
-.. image:: http://arquimedes.cnb.csic.es:9980/badges/ccp4_prod.svg
+.. image:: http://scipion-test.cnb.csic.es:9980/badges/ccp4_prod.svg
 
