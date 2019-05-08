@@ -91,6 +91,16 @@ the pdb file from coot  to scipion '
         form.addParam('doInteractive', BooleanParam, default=True,
                       label='Interactive', condition='False',
                       help="""It makes coot an interactive protocol""")
+        form.addParam('phythonscript', StringParam, default="",
+                      label='pythonScript', condition='False',
+                      help="""calls coot with '--python string'""")
+        form.addParam('inputProtocol', PointerParam,
+                  label="Input protocols", important=True,
+                  pointerClass='PhenixProtRunMolprobity, '
+                               'PhenixProtRunRSRefine',
+                  help="Father protocol. This is used for trazability "
+                       "when coot is launched by a viewer ")
+
         form.addSection(label='Help')
         form.addLine('Press "w" in coot to transfer the pdb file from coot '
                      'to scipion.\nYou may also execute (Calculate -> '
@@ -223,7 +233,9 @@ the pdb file from coot  to scipion '
         if self.extraCommands.get() != '':
             args += " --no-graphics "
         args += " --script " + self._getExtraPath(cootScriptFileName)
-
+        if len(self.phythonscript.get()) > 1:
+            args += " --python {phythonscript}".format(
+                phythonscript=self.phythonscript.get())
         # script with auxiliary files
         self._log.info('Launching: ' + Plugin.getProgram(self.COOT) + ' ' + args)
 
@@ -599,6 +611,7 @@ aa_auxiliary_chain: AA
 aaNumber: 100
 step: 10
 """)
+        f.close()
 
 def _checkTableExists(dbcon, tablename):
     dbcur = dbcon.cursor()
