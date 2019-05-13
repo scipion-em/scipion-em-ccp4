@@ -94,7 +94,7 @@ the pdb file from coot  to scipion '
         form.addParam('phythonscript', StringParam, default="",
                       label='pythonScript', condition='False',
                       help="""calls coot with '--python string'""")
-        form.addParam('inputProtocol', PointerParam,
+        form.addParam('inputProtocol', PointerParam, allowsNull=True,
                   label="Input protocols", important=True,
                   pointerClass='PhenixProtRunMolprobity, '
                                'PhenixProtRunRSRefine',
