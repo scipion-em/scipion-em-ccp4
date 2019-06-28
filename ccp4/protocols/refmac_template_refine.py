@@ -36,7 +36,7 @@ template_refmac_header="""#!/bin/sh
 #	Electron scattering file: atomsf_electron.lib.
 #
 # The script starts by calculating complex structure factors around a given radius taken from the input model.
-# The radius is given in Angstrom and is can be user-defined (SFCALC MRAD 3). 
+# The radius is given in Angstroms and it can be user-defined (SFCALC MRAD 3). 
 #
 
 # Directory of output files (extra folder)
