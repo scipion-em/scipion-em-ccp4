@@ -136,10 +136,11 @@ the pdb file from coot  to scipion '
         self.norVolumesNames = []
         # if self.inputVolumes is None:
         if len(self.inputVolumes) is 0:
-            vol = self.pdbFileToBeRefined.get().getVolume()
-            inFileName = vol.getFileName()
-            self.inVolumes.append(vol)
-            self.norVolumesNames.append(self._getVolumeFileName(inFileName))
+            if self.pdbFileToBeRefined.get().getVolume() is not None:
+                vol = self.pdbFileToBeRefined.get().getVolume()
+                inFileName = vol.getFileName()
+                self.inVolumes.append(vol)
+                self.norVolumesNames.append(self._getVolumeFileName(inFileName))
         else:
             for vol in self.inputVolumes:
                 inFileName = vol.get().getFileName()
@@ -321,13 +322,16 @@ the pdb file from coot  to scipion '
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
-        # Check that the input volume exist
-        if self.pdbFileToBeRefined.hasValue():
-            if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                    and self.inputVolumes.isEmpty():
-                errors.append("Error: You should provide a volume.\n")
+        if self.inputProtocol.get().getClassName().startswith("PhenixProtRunMolprobity"):
+            return errors
+        else:
+            # Check that the input volume exist
+            if self.pdbFileToBeRefined.hasValue():
+                if (not self.pdbFileToBeRefined.get().hasVolume()) \
+                        and self.inputVolumes.isEmpty():
+                    errors.append("Error: You should provide a volume.\n")
 
-        return errors
+            return errors
 
     @classmethod
     def validateInstallation(cls):
