@@ -95,10 +95,12 @@ the pdb file from coot  to scipion '
                       label='pythonScript', condition='False',
                       help="""calls coot with '--python string'""")
         form.addParam('inputProtocol', PointerParam, allowsNull=True,
-                  label="Input protocols", important=True,
-                  pointerClass='PhenixProtRunMolprobity, '
+                      default=None,
+                      condition='False',
+                      label="Input protocols", important=True,
+                      pointerClass='PhenixProtRunMolprobity, '
                                'PhenixProtRunRSRefine',
-                  help="Father protocol. This is used for trazability "
+                      help="Father protocol. This is used for trazability "
                        "when coot is launched by a viewer ")
 
         form.addSection(label='Help')
@@ -316,14 +318,14 @@ the pdb file from coot  to scipion '
 
     # --------------------------- INFO functions ---------------------------
     def _validate(self):
-
         errors = []
 
         if not validVersion(7, 0.056):
             errors.append("CCP4 version should be at least 7.0.056")
 
-        if self.inputProtocol.get().getClassName().startswith("PhenixProtRunMolprobity"):
-            return errors
+        if self.inputProtocol.get() is not None and \
+                self.inputProtocol.get().getClassName().startswith("PhenixProtRunMolprobity"):
+                 return errors
         else:
             # Check that the input volume exist
             if self.pdbFileToBeRefined.hasValue():
