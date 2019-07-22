@@ -67,12 +67,12 @@ To check the installation, simply run the following Scipion test:
 
 see https://github.com/scipion-em/scipion-em-ccp4/wiki
 
-========
+=========
 Protocols
-========
+=========
 
 * coot refinement: Molecular interactive graphics application used for flexible fitting, refinement, model completion, and validation of structures of macromolecules regarding electron density maps. See the `details <https://www2.mrc-lmb.cam.ac.uk/personal/pemsley/coot/>`_ of *Coot* utilities. 
-* refmac: Automatic refinement program in Fourier space of macromolecule structures regarding electron density maps. See the `details <http://www.ccp4.ac.uk/html/refmac5/description.html>`_ of *Refmac* utilities.
+* refmac: Automatic refinement program in Fourier space of macromolecule structures regarding electron density maps. See ` <http://www.ccp4.ac.uk/html/refmac5/description.html>`_ of *Refmac* utilities.
 
 
 

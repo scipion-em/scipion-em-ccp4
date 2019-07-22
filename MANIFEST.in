@@ -1,3 +1,4 @@
 include *.txt
 include *.rst
 include LICENSE
+include lccp4/protocols.conf

@@ -1,2 +1,4 @@
 16-October-2018 - Add a PIP module files
-
+22-July-2019 - 
+    many bug and usability improvements
+    coot protocol may be called from another protocols
