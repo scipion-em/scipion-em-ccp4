@@ -79,6 +79,7 @@ the pdb file from coot  to scipion '
                            "will be saved after refinement, will be saved")
         form.addParam('inputPdbFiles', MultiPointerParam,
                       pointerClass="AtomStruct",
+                      allowsNull=True,
                       label='Other reference atomic structures',
                       help="Other PDBx/mmCIF files used as reference. These PDBx/mmCIF "
                            "objects will not be saved")
