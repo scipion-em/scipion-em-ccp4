@@ -24,7 +24,7 @@
 # **************************************************************************
 
 import os
-import pyworkflow.em
+import pwem
 import pyworkflow.utils as pwutils
 import getpass
 
@@ -34,7 +34,7 @@ _references = ['Winn_2011']
 _logo = "ccp4_200.png"
 
 
-class Plugin(pyworkflow.em.Plugin):
+class Plugin(pwem.Plugin):
     _homeVar = CCP4_HOME_VARNAME
     _versions = {'CCP4': [V7_0]}
 
@@ -49,13 +49,14 @@ class Plugin(pyworkflow.em.Plugin):
                             os.path.basename(progName))
 
     @classmethod
-    def getEnviron(cls):
+    def getEnviron(cls, first=True):
         def deleteEnv(name):
             if name in os.environ:
                 os.environ.pop(name)
 
         environ = pwutils.Environ(os.environ)
-        #pos = pwutils.Environ.BEGIN if ccp4First else pwutils.Environ.END
+        #environ = pwutils.Environ()
+        # pos = pwutils.Environ.BEGIN if ccp4First else pwutils.Environ.END
         _ccp4_home = cls.getHome()
         _ccp4_master, _dir = os.path.split(_ccp4_home)
         _username = getpass.getuser()
@@ -152,15 +153,15 @@ class Plugin(pyworkflow.em.Plugin):
         this function just check that they exist"""
         pass
 
-
     @classmethod
     def checkBinaries(cls, programName):
         """ Check that this binary is available"""
 
         if not os.path.exists(cls.getProgram(programName)):
             return False, "Binary file %s does not exists. " \
-                      "Please, install CCP4 software suite (see %s)" % (programName, CCP4_URL)
+                          "Please, install CCP4 software suite (see %s)" % (programName, CCP4_URL)
         else:
             return True, ""
 
-pyworkflow.em.Domain.registerPlugin(__name__)
+
+pwem.Domain.registerPlugin(__name__)

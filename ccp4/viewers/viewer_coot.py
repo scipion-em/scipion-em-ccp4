@@ -27,8 +27,9 @@
 import os
 import sqlite3
 
-from pyworkflow.em.convert import ImageHandler
-from pyworkflow.em.viewers.viewer_chimera import Chimera
+from pwem import Domain
+from pwem.convert import ImageHandler
+from pwem.viewers.viewer_chimera import Chimera
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
 from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
                                           outpuDataBaseNameWithLabels,
@@ -105,5 +106,6 @@ class CootRefineViewer(Viewer):
         f.close()
         conn.close()
         # run in the background
-        Chimera.runProgram(Chimera.getProgram(), fnCmd+"&")
+        chimeraPlugin = Domain.importFromPlugin('chimera', 'Plugin', doRaise=True)
+        chimeraPlugin.runChimeraProgram(chimeraPlugin.getProgram(), fnCmd + "&")
         return []
