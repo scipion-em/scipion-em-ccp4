@@ -32,7 +32,8 @@ try:
     from pwem.objects import AtomStruct
 except:
     from pwem.objects import PdbFile as AtomStruct
-from pwem.convert import ImageHandler, Ccp4Header
+from pwem.emlib.image import ImageHandler
+from pwem.convert import Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
 from pwem.protocols import EMProtocol
@@ -47,6 +48,7 @@ cootPdbTemplateFileName = "cootOut%04d.pdb"
 cootScriptFileName = "cootScript.py"
 outpuDataBaseNameWithLabels = "outpuDataBaseNameWithLabels.sqlite"
 databaseTableName = 'pdb'
+
 
 class CootRefine(EMProtocol):
     """Coot is an interactive graphical application for
