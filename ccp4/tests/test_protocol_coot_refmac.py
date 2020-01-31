@@ -348,8 +348,8 @@ class TestCootRefinement2(TestImportData):
 
         try:
             self.launchProtocol(protCoot)
-        except:
-            print("first call to coot ended")
+        except Exception as e:
+            print("first call to coot ended. ", e)
         self.assertIsNotNone(protCoot.testLabel5.getFileName(),
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.testLabel5.getFileName()))
