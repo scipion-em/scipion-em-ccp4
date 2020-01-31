@@ -28,7 +28,7 @@ import os
 import sqlite3
 
 from pwem import Domain
-from pwem.convert import ImageHandler
+from pwem.emlib.image import ImageHandler
 from pwem.viewers.viewer_chimera import Chimera
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
 from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
