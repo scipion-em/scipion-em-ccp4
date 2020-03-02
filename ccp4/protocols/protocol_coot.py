@@ -140,19 +140,25 @@ the pdb file from coot  to scipion '
         self.inVolumes = []
         self.norVolumesNames = []
         # if self.inputVolumes is None:
+        tmpDict = {}
         if len(self.inputVolumes) is 0:
             if self.pdbFileToBeRefined.get().getVolume() is not None:
                 vol = self.pdbFileToBeRefined.get().getVolume()
                 inFileName = vol.getFileName()
-                self.inVolumes.append(vol)
+                tmpDict['volName'] = inFileName
+                tmpDict['volSamplingRate'] = vol.getSamplingRate()
+                tmpDict['volShifts'] = vol.getOrigin(force=True).getShifts()
+                self.inVolumes.append(tmpDict)
                 self.norVolumesNames.append(self._getVolumeFileName(inFileName))
         else:
             for vol in self.inputVolumes:
                 inFileName = vol.get().getFileName()
-                self.inVolumes.append(vol.get())
+                tmpDict['volName'] = inFileName
+                tmpDict['volSamplingRate'] = vol.get().getSamplingRate()
+                tmpDict['volShifts'] = vol.get().getOrigin(force=True).getShifts()
+                self.inVolumes.append(tmpDict)
                 self.norVolumesNames.append(
                     self._getVolumeFileName(inFileName))
-
         convertId = self._insertFunctionStep('convertInputStep',
                                              self.inVolumes,
                                              self.norVolumesNames)
@@ -170,7 +176,7 @@ the pdb file from coot  to scipion '
         """
         ih = ImageHandler()
         for inVol, norVolName in zip(inVolumes, norVolumesNames):
-            inVolName = inVol.getFileName()
+            inVolName = inVol['volName']
 
             if inVolName.endswith(".mrc"):
                 inVolName += ":mrc"
@@ -185,10 +191,9 @@ the pdb file from coot  to scipion '
                     img.write(norVolName)
                 else:
                     ImageHandler().convert(inVolName, norVolName)
-                Ccp4Header(norVolName).copyCCP4Header(
-                    inVolName, inVol.getOrigin(
-                               force=True).getShifts(),
-                               inVol.getSamplingRate(), originField=Ccp4Header.START)
+                Ccp4Header(norVolName, readHeader=True).copyCCP4Header(
+                    inVolName, inVol['volShifts'],
+                               inVol['volSamplingRate'], originField=Ccp4Header.START)
 
     def runCootStep(self, inVolumes, norVolumesNames):
 
@@ -271,6 +276,7 @@ the pdb file from coot  to scipion '
             pdbLabelName = row[1]
             pdb = AtomStruct()
             pdb.setFileName(pdbFileName)
+
             outputs = {str(pdbLabelName) : pdb}
             self._defineOutputs(**outputs)
             # self._defineOutputs(outputPdb=pdb)
