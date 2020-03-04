@@ -192,8 +192,7 @@ the pdb file from coot  to scipion '
                 else:
                     ImageHandler().convert(inVolName, norVolName)
                 Ccp4Header(norVolName, readHeader=True).copyCCP4Header(
-                    inVolName, inVol['volShifts'],
-                               inVol['volSamplingRate'], originField=Ccp4Header.START)
+                    inVol['volShifts'], inVol['volSamplingRate'], originField=Ccp4Header.START)
 
     def runCootStep(self, inVolumes, norVolumesNames):
 
