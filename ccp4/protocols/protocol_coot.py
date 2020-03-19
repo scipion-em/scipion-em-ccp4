@@ -44,10 +44,10 @@ from pyworkflow.utils.properties import Message
 from ccp4.constants import CCP4_BINARIES
 import sqlite3
 
-cootPdbTemplateFileName = "cootOut%04d.pdb"
-cootScriptFileName = "cootScript.py"
-outpuDataBaseNameWithLabels = "outpuDataBaseNameWithLabels.sqlite"
-databaseTableName = 'pdb'
+COOTPDBTEMPLATEFILENAME = "cootOut%04d.pdb"
+COOTSCRIPTFILENAME = "cootScript.py"
+OUTPUTDATABASENAMESWITHLABELS = "outpuDataBaseNameWithLabels.sqlite"
+DATABASETABLENAME = 'pdb'
 
 
 class CootRefine(EMProtocol):
@@ -136,47 +136,23 @@ the pdb file from coot  to scipion '
         # --------------------------- INSERT steps functions ---------------
 
     def _insertAllSteps(self):
-        # test loop over inputVol
-        self.inVolumes = []
-        self.norVolumesNames = []
-        # if self.inputVolumes is None:
-        tmpDict = {}
-        if len(self.inputVolumes) is 0:
-            if self.pdbFileToBeRefined.get().getVolume() is not None:
-                vol = self.pdbFileToBeRefined.get().getVolume()
-                inFileName = vol.getFileName()
-                tmpDict['volName'] = inFileName
-                tmpDict['volSamplingRate'] = vol.getSamplingRate()
-                tmpDict['volShifts'] = vol.getOrigin(force=True).getShifts()
-                self.inVolumes.append(tmpDict)
-                self.norVolumesNames.append(self._getVolumeFileName(inFileName))
-        else:
-            for vol in self.inputVolumes:
-                inFileName = vol.get().getFileName()
-                tmpDict['volName'] = inFileName
-                tmpDict['volSamplingRate'] = vol.get().getSamplingRate()
-                tmpDict['volShifts'] = vol.get().getOrigin(force=True).getShifts()
-                self.inVolumes.append(tmpDict)
-                self.norVolumesNames.append(
-                    self._getVolumeFileName(inFileName))
-        convertId = self._insertFunctionStep('convertInputStep',
-                                             self.inVolumes,
-                                             self.norVolumesNames)
 
-        self.step = self._insertFunctionStep('runCootStep', self.inVolumes,
-                                 self.norVolumesNames,
-                                 prerequisites=[convertId],
+        convertId = self._insertFunctionStep('convertInputStep')
+
+        self.step = self._insertFunctionStep('runCootStep', prerequisites=[convertId],
                                  interactive=self.doInteractive)
 
 
     # --------------------------- STEPS functions --------------------------
 
-    def convertInputStep(self, inVolumes, norVolumesNames):
+    def convertInputStep(self):
         """ convert 3D maps to MRC '.mrc' format
         """
+        inVolumes, norVolumesNames = self._getVolumesList()
+
         ih = ImageHandler()
         for inVol, norVolName in zip(inVolumes, norVolumesNames):
-            inVolName = inVol['volName']
+            inVolName = inVol.getFileName()
 
             if inVolName.endswith(".mrc"):
                 inVolName += ":mrc"
@@ -192,25 +168,27 @@ the pdb file from coot  to scipion '
                 else:
                     ImageHandler().convert(inVolName, norVolName)
                 Ccp4Header(norVolName, readHeader=True).copyCCP4Header(
-                    inVol['volShifts'], inVol['volSamplingRate'], originField=Ccp4Header.START)
+                    inVol.getOrigin(force=True).getShifts(), inVol.getSamplingRate(), originField=Ccp4Header.START)
 
-    def runCootStep(self, inVolumes, norVolumesNames):
+    def runCootStep(self):
+
+        inVolumes, norVolumesNames = self._getVolumesList()
 
         # PDB
         # find last created PDB output file
         listOfPDBs = []
-        template = self._getExtraPath(cootPdbTemplateFileName)
+        template = self._getExtraPath(COOTPDBTEMPLATEFILENAME)
 
         # if there is no database use pdb file from the form
         # otherwise use last created pdb file
-        databasePath = self._getExtraPath(outpuDataBaseNameWithLabels)
+        databasePath = self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
         if not os.path.exists(databasePath):
             pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
         else:
             # open database
             conn = sqlite3.connect(databasePath)
             # check tables exists
-            if not _checkTableExists(conn, databaseTableName):
+            if not _checkTableExists(conn, DATABASETABLENAME):
                  pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
             else:
                 c = conn.cursor()
@@ -218,7 +196,7 @@ the pdb file from coot  to scipion '
                 # read filename and label in a loop
                 c.execute(
                     'SELECT pdbFileName FROM %s order by id DESC limit 1' %
-                    databaseTableName)
+                    DATABASETABLENAME)
                 pdbFileToBeRefined = c.fetchone()[0]
 
         listOfPDBs.append(pdbFileToBeRefined)
@@ -226,15 +204,15 @@ the pdb file from coot  to scipion '
             listOfPDBs.append(pdb.get().getFileName())  # other pdb files
 
         createScriptFile(0,  # imol
-                         self._getExtraPath(cootScriptFileName), # save script in extra otherwise is lost
-                                                               # when continue
-                         self._getExtraPath(cootPdbTemplateFileName),
+                         self._getExtraPath(COOTSCRIPTFILENAME),  # save script in extra otherwise is lost
+                         # when continue
+                         self._getExtraPath(COOTPDBTEMPLATEFILENAME),
                          norVolumesNames,
                          listOfPDBs,
                          self.extraCommands.get(),
                          self._getExtraPath(self.COOTINI),  # coot.ini
-                         self._getExtraPath(outpuDataBaseNameWithLabels),
-                         table_name=databaseTableName
+                         self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS),
+                         table_name=DATABASETABLENAME
                          )
 
         args = ""
@@ -242,7 +220,7 @@ the pdb file from coot  to scipion '
         #  extraCommands option is only used for tests
         if self.extraCommands.get() != '':
             args += " --no-graphics "
-        args += " --script " + self._getExtraPath(cootScriptFileName)
+        args += " --script " + self._getExtraPath(COOTSCRIPTFILENAME)
         if len(self.phythonscript.get()) > 1:
             args += " --python {phythonscript}".format(
                 phythonscript=self.phythonscript.get())
@@ -253,15 +231,15 @@ the pdb file from coot  to scipion '
         runCCP4Program(Plugin.getProgram(self.COOT), args)
 
         counter = self.getCounter()
-        self.createOutputStep(inVolumes, norVolumesNames, counter)
+        self.createOutput(inVolumes, norVolumesNames, counter)
 
-    def createOutputStep(self, inVolumes, norVolumesNames, init_counter=1):
+    def createOutput(self, inVolumes, norVolumesNames, init_counter=1):
         """ Copy the PDB structure and register the output object.
         """
-        databasePath = self._getExtraPath(outpuDataBaseNameWithLabels)
+        databasePath = self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
         # open database
         conn = sqlite3.connect(databasePath)
-        if not _checkTableExists(conn, databaseTableName):
+        if not _checkTableExists(conn, DATABASETABLENAME):
             conn.close()
             return
 
@@ -269,7 +247,7 @@ the pdb file from coot  to scipion '
 
         # read filename and label in a loop
         c.execute('SELECT pdbFileName, pdbLabelName FROM %s where saved = 0' %
-                  databaseTableName)
+                  DATABASETABLENAME)
         for row in c:
             pdbFileName = row[0]
             pdbLabelName = row[1]
@@ -289,12 +267,12 @@ the pdb file from coot  to scipion '
 
         # clear database. Not very important since it will be deleted
         # since it is wrotten in tmp
-        sql = 'update %s set saved = 1' % databaseTableName
+        sql = 'update %s set saved = 1' % DATABASETABLENAME
         c.execute(sql)
         conn.commit()
         conn.close()
 
-        template = self._getExtraPath(cootPdbTemplateFileName)
+        template = self._getExtraPath(COOTPDBTEMPLATEFILENAME)
         counter = init_counter
         counter -= 1
 
@@ -374,6 +352,27 @@ the pdb file from coot  to scipion '
 
     # --------------------------- UTILS functions --------------------------
 
+    def _getVolumesList(self):
+
+        # test loop over inputVol
+        inVolumes = []
+        norVolumesNames = []
+        # if self.inputVolumes is None:
+        if len(self.inputVolumes) is 0:
+            if self.pdbFileToBeRefined.get().getVolume() is not None:
+                vol = self.pdbFileToBeRefined.get().getVolume()
+                inFileName = vol.getFileName()
+                inVolumes.append(vol)
+                norVolumesNames.append(self._getVolumeFileName(inFileName))
+        else:
+            for vol in self.inputVolumes:
+                inFileName = vol.get().getFileName()
+                inVolumes.append(vol.get())
+                norVolumesNames.append(
+                    self._getVolumeFileName(inFileName))
+
+        return inVolumes, norVolumesNames
+
     def _getVolumeFileName(self, inFileName):
         return os.path.join(self._getExtraPath(''),
                             pwutils.replaceBaseExt(inFileName, 'mrc'))
@@ -382,7 +381,7 @@ the pdb file from coot  to scipion '
         return tup[:ix] + (val,) + tup[ix+1:]
 
     def getCounter(self):
-        template = self._getExtraPath(cootPdbTemplateFileName)
+        template = self._getExtraPath(COOTPDBTEMPLATEFILENAME)
         counter = 1
         while os.path.isfile(template % counter):
             counter += 1
