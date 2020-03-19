@@ -31,9 +31,9 @@ from pwem import Domain
 from pwem.emlib.image import ImageHandler
 from pwem.viewers.viewer_chimera import Chimera
 from pyworkflow.viewer import DESKTOP_TKINTER, Viewer
-from ccp4.protocols.protocol_coot import (CootRefine, cootPdbTemplateFileName,
-                                          outpuDataBaseNameWithLabels,
-                                          databaseTableName)
+from ccp4.protocols.protocol_coot import (CootRefine, COOTPDBTEMPLATEFILENAME,
+                                          OUTPUTDATABASENAMESWITHLABELS,
+                                          DATABASETABLENAME)
 
 # TODO: very likely this should inherit from ProtocolViewer
 # not from XmippViewer. But then I get an empty form :-(
@@ -92,12 +92,12 @@ class CootRefineViewer(Viewer):
             count += 1
 
         counter = 1
-        template = self.protocol._getExtraPath(cootPdbTemplateFileName)
-        databasePath = self.protocol._getExtraPath(outpuDataBaseNameWithLabels)
+        template = self.protocol._getExtraPath(COOTPDBTEMPLATEFILENAME)
+        databasePath = self.protocol._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
         conn = sqlite3.connect(databasePath)
         c = conn.cursor()
-        sql = 'SELECT pdbFileName FROM %s where saved = 1 order by id' %\
-              databaseTableName
+        sql = 'SELECT pdbFileName FROM %s where saved = 1 order by id' % \
+              DATABASETABLENAME
         c.execute(sql)
         for row in c:
             pdbFileName = os.path.abspath(row[0])
