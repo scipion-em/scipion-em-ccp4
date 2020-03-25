@@ -2,7 +2,7 @@
 CCP4 scipion plugin
 ===================
 
-This plugin allows to use CCP4 programs within the Scipion framework. **You need to install this package before installing the plugin**, see section "Binary Files" for details.
+This plugin allows to use CCP4 programs within the Scipion framework. **You need to install the CCP4 suite before installing the plugin**, see section "Binary Files" for details.
 
 CCP4, from Collaborative Computational Project Number 4, is a software suite that allows model building of macromolecule structures obtained by X-ray crystallography, and that has been extended to other techniques like cryo-EM (see `CCP4 home page <http://www.ccp4.ac.uk/>`_ for details).
 
