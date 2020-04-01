@@ -45,7 +45,7 @@ OR
 
 - **Binary files** 
 
-CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recommend to install CCP4 version 7.0.056 or higher.
+CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recommend to install CCP4 version 7.0.056 or higher. (see http://www.ccp4.ac.uk/download/#os=linux)
 
 
 
