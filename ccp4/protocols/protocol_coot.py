@@ -28,10 +28,7 @@ import os
 import pyworkflow.utils as pwutils
 from pyworkflow import VERSION_1_2
 from pwem.objects import Volume, EMObject
-try:
-    from pwem.objects import AtomStruct
-except:
-    from pwem.objects import PdbFile as AtomStruct
+from pwem.objects import AtomStruct
 from pwem.emlib.image import ImageHandler
 from pwem.convert import Ccp4Header
 from ccp4 import Plugin
@@ -44,10 +41,19 @@ from pyworkflow.utils.properties import Message
 from ccp4.constants import CCP4_BINARIES
 import sqlite3
 
-COOTPDBTEMPLATEFILENAME = "cootOut%04d.pdb"
+
+# template for new atomic models, first ID is the coot model id
+# the second id increases for each time the model is saved
+COOTPDBTEMPLATEFILENAME = "cootImol_%04d_version_%04d.pdb" # modelID, counter
+# filename for coot script file
 COOTSCRIPTFILENAME = "cootScript.py"
+# database that stores filenames and corresponding models
 OUTPUTDATABASENAMESWITHLABELS = "outpuDataBaseNameWithLabels.sqlite"
+#table with the information
 DATABASETABLENAME = 'pdb'
+
+TYPE_3DMAP = 0
+TYPE_ATOMSTRUCT = 1
 
 
 class CootRefine(EMProtocol):
@@ -94,6 +100,7 @@ the pdb file from coot  to scipion '
         form.addParam('doInteractive', BooleanParam, default=True,
                       label='Interactive', condition='False',
                       help="""It makes coot an interactive protocol""")
+        # TODO: when is this used, just for testing?
         form.addParam('phythonscript', StringParam, default="",
                       label='pythonScript', condition='False',
                       help="""calls coot with '--python string'""")
@@ -136,20 +143,83 @@ the pdb file from coot  to scipion '
         # --------------------------- INSERT steps functions ---------------
 
     def _insertAllSteps(self):
-
-        convertId = self._insertFunctionStep('convertInputStep')
-
-        self.step = self._insertFunctionStep('runCootStep', prerequisites=[convertId],
-                                 interactive=self.doInteractive)
+        convertId = self._insertFunctionStep('convertInputAndSaveToDBStep')
+        self.step = self._insertFunctionStep('runCootStep',
+                                             prerequisites=[convertId],
+                                             interactive=self.doInteractive)
 
 
     # --------------------------- STEPS functions --------------------------
 
-    def convertInputStep(self):
-        """ convert 3D maps to MRC '.mrc' format
+    def convertInputAndSaveToDBStep(self):
+        """ init database to store the last name of the files used and
+            convert 3D maps to MRC '.mrc' format.
+            This step  is run once even if the protocol is relunched
         """
+        databasePath = self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
+
+        # create database and table
+        # this table will be used to record the last version of any file
+        # save in coot
+        conn = sqlite3.connect(databasePath)
+
+        # create table
+        # saved = 0, means this file need to be converted to a scipion object
+        # type  = 0-> Map, 1 -> atom struct
+        # predefined macros for type:
+        # TYPE_3DMAP = 0
+        # TYPE_ATOMSTRUCT = 1
+
+        sqlCommand = """create table if not exists %s 
+                               (id integer primary key AUTOINCREMENT,
+                                modelId integer,
+                                fileName text,
+                                labelName text,
+                                type int,
+                                saved integer default 1
+                                )""" % (DATABASETABLENAME)
+
+        conn.execute(sqlCommand)
+
+        # create view to retrieve the id of the last copy
+        # for each model id  (coot call imol to this id)
+        sqlCommand = """CREATE VIEW lastid AS 
+                        SELECT modelId, max(id) as id
+                        FROM %s
+                        GROUP BY modelId
+        """ % DATABASETABLENAME
+
+        conn.execute(sqlCommand)
+
         inVolumes, norVolumesNames = self._getVolumesList()
 
+        sqlCommand = """INSERT INTO %s (modelId, fileName, labelName, type, saved) values
+                        (%d, '%s', '%s', %d, %d)"""
+
+        #process main atomic Structure
+        counter=0
+        pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
+        base = os.path.basename(pdbFileToBeRefined)
+        conn.execute(sqlCommand % (DATABASETABLENAME, counter, pdbFileToBeRefined,
+                                   os.path.splitext(base)[0], TYPE_ATOMSTRUCT, 1 # saved
+                                   )
+                     )
+        counter += 1
+
+        # Process another atom structures
+        for pdb in self.inputPdbFiles:
+            fileName = pdb.get().getFileName()
+            base = os.path.basename(fileName)
+            conn.execute(sqlCommand % (DATABASETABLENAME, counter,
+                                       fileName,
+                                       os.path.splitext(base)[0], TYPE_ATOMSTRUCT,
+                                       1 # saved
+                                       )
+                         )
+            counter += 1
+
+        # Process 3D maps
+        # normalize them if needed
         ih = ImageHandler()
         for inVol, norVolName in zip(inVolumes, norVolumesNames):
             inVolName = inVol.getFileName()
@@ -168,50 +238,28 @@ the pdb file from coot  to scipion '
                 else:
                     ImageHandler().convert(inVolName, norVolName)
                 Ccp4Header(norVolName, readHeader=True).copyCCP4Header(
-                    inVol.getOrigin(force=True).getShifts(), inVol.getSamplingRate(), originField=Ccp4Header.START)
+                    inVol.getOrigin(force=True).getShifts(),
+                    inVol.getSamplingRate(), originField=Ccp4Header.START)
+
+            conn.execute(sqlCommand%(DATABASETABLENAME, counter, norVolName[:-4],
+                                     os.path.basename(norVolName)[:-8], TYPE_3DMAP, 0 # saved
+                                     )
+                         )
+            counter += 1
+
+        conn.commit()
 
     def runCootStep(self):
 
-        inVolumes, norVolumesNames = self._getVolumesList()
-
-        # PDB
-        # find last created PDB output file
-        listOfPDBs = []
-        template = self._getExtraPath(COOTPDBTEMPLATEFILENAME)
-
-        # if there is no database use pdb file from the form
-        # otherwise use last created pdb file
         databasePath = self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
-        if not os.path.exists(databasePath):
-            pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
-        else:
-            # open database
-            conn = sqlite3.connect(databasePath)
-            # check tables exists
-            if not _checkTableExists(conn, DATABASETABLENAME):
-                 pdbFileToBeRefined = self.pdbFileToBeRefined.get().getFileName()
-            else:
-                c = conn.cursor()
-
-                # read filename and label in a loop
-                c.execute(
-                    'SELECT pdbFileName FROM %s order by id DESC limit 1' %
-                    DATABASETABLENAME)
-                pdbFileToBeRefined = c.fetchone()[0]
-
-        listOfPDBs.append(pdbFileToBeRefined)
-        for pdb in self.inputPdbFiles:
-            listOfPDBs.append(pdb.get().getFileName())  # other pdb files
-
         createScriptFile(0,  # imol
                          self._getExtraPath(COOTSCRIPTFILENAME),  # save script in extra otherwise is lost
                          # when continue
-                         self._getExtraPath(COOTPDBTEMPLATEFILENAME),
-                         norVolumesNames,
-                         listOfPDBs,
+                         self._getExtraPath(COOTPDBTEMPLATEFILENAME), # default template name for
+                                                                      # fro newPDBs
                          self.extraCommands.get(),
                          self._getExtraPath(self.COOTINI),  # coot.ini
-                         self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS),
+                         databasePath,
                          table_name=DATABASETABLENAME
                          )
 
@@ -229,14 +277,14 @@ the pdb file from coot  to scipion '
 
         # run in the background
         runCCP4Program(Plugin.getProgram(self.COOT), args)
+        self.createOutput()
 
-        counter = self.getCounter()
-        self.createOutput(inVolumes, norVolumesNames, counter)
-
-    def createOutput(self, inVolumes, norVolumesNames, init_counter=1):
+    def createOutput(self):
         """ Copy the PDB structure and register the output object.
         """
         databasePath = self._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
+        getModels(databasePath, DATABASETABLENAME)
+
         # open database
         conn = sqlite3.connect(databasePath)
         if not _checkTableExists(conn, DATABASETABLENAME):
@@ -245,9 +293,10 @@ the pdb file from coot  to scipion '
 
         c = conn.cursor()
 
-        # read filename and label in a loop
-        c.execute('SELECT pdbFileName, pdbLabelName FROM %s where saved = 0' %
-                  DATABASETABLENAME)
+        # read atom struct filename and label in a loop
+        c.execute('SELECT fileName, labelName '
+                  'FROM %s '
+                  'WHERE saved = 0 AND type=%d' % (DATABASETABLENAME, TYPE_ATOMSTRUCT))
         for row in c:
             pdbFileName = row[0]
             pdbLabelName = row[1]
@@ -256,28 +305,32 @@ the pdb file from coot  to scipion '
 
             outputs = {str(pdbLabelName) : pdb}
             self._defineOutputs(**outputs)
-            # self._defineOutputs(outputPdb=pdb)
             self._defineSourceRelation(self.inputPdbFiles, pdb)
 
-            # self._defineSourceRelation(self.inputVolumes, self.outputPdb)
-
-            for vol in inVolumes:
-                self._defineSourceRelation(vol, pdb)
-
-
-        # clear database. Not very important since it will be deleted
-        # since it is wrotten in tmp
-        sql = 'update %s set saved = 1' % DATABASETABLENAME
+        # files has been saved
+        sql = 'UPDATE %s SET saved = 1 WHERE saved=0 ' \
+              'AND type=%d' % (DATABASETABLENAME, TYPE_ATOMSTRUCT)
         c.execute(sql)
+
+        # check if normalized files are saved
+        sql = "SELECT count(*) " \
+              "FROM %s " \
+              "WHERE saved = 0 " \
+              "  AND type = %d LIMIT 1" % (DATABASETABLENAME, TYPE_3DMAP)
+        c.execute(sql)
+        result = c.fetchone()[0]
+
+        # update  saved parameter
+        if result>0:
+            sql = 'UPDATE %s SET saved = 1 WHERE saved=0 ' \
+                  'AND type=%d' % (DATABASETABLENAME, TYPE_3DMAP)
+            c.execute(sql)
         conn.commit()
         conn.close()
 
-        template = self._getExtraPath(COOTPDBTEMPLATEFILENAME)
-        counter = init_counter
-        counter -= 1
-
-        if not os.path.isfile(template % 2):  # only the first time get inside
-            # here
+        # save normalized  vols...
+        if result>0:
+            inVolumes, norVolumesNames = self._getVolumesList()
             counter = 1
             for inVol, norVolName in zip(inVolumes, norVolumesNames):
                 outVol = Volume()
@@ -295,6 +348,8 @@ the pdb file from coot  to scipion '
                 counter += 1
                 self._defineOutputs(**outputs)
                 self._defineSourceRelation(inVol, outVol)
+        else:
+            print("skip save normalized vol")
 
         if os.path.isfile(self._getExtraPath('STOPPROTCOL')):
             self.setStatus(STATUS_FINISHED)
@@ -353,7 +408,7 @@ the pdb file from coot  to scipion '
     # --------------------------- UTILS functions --------------------------
 
     def _getVolumesList(self):
-
+        print("_getVolumesList", flush=True)
         # test loop over inputVol
         inVolumes = []
         norVolumesNames = []
@@ -390,16 +445,18 @@ the pdb file from coot  to scipion '
 cootScriptHeader = '''import ConfigParser
 import os
 from subprocess import call
-mydict={}
-mydict['imol']=%d
-mydict['aa_main_chain']="B"
-mydict['aa_auxiliary_chain']="BB"
-mydict['aaNumber']=37
+mydict={{}}
+mydict['imol']={imol}
+mydict['aa_main_chain']="A"
+mydict['aa_auxiliary_chain']="AA"
+mydict['aaNumber']=17
 mydict['step']=5
-mydict['outfile']='%s'
-cootPath='%s'
-databasePath='%s'
-table_name = '%s'
+mydict['outfile'] = '{templateNameAtomStruct}'
+cootPath='{cootFileName}'
+databasePath='{outpuDataBaseNameWithLabels}'
+table_name = '{table_name}'
+TYPE_3DMAP = {TYPE_3DMAP}
+TYPE_ATOMSTRUCT = {TYPE_ATOMSTRUCT}
 '''
 
 cootScriptBody = '''
@@ -471,37 +528,46 @@ def _updateMol():
         mydict['outfile']            = config.get("myvars", "outfile")
     except ConfigParser.NoOptionError:
         pass
+    add_status_bar_text("Global variable updated using coot.ini")
     beep(0.1)
 
 
-def getOutPutFileName(template):
+def getOutPutFileName(template, imol):
     """get name based on template that does not exists
     %04d will be incremented untill it does not exists"""
     counter=1
     if "%04d" in template:
-        while os.path.isfile(template%counter):
+        while os.path.isfile(template%(imol, counter)):
              counter += 1
 
-    return template%counter
+    return template % (imol, counter)
 
-def storeFileNameDataBase(outFileName, outLabel=None):
+def storeFileNameDataBase(imol, outFileName, outLabel=None, type=TYPE_ATOMSTRUCT):
     import sqlite3
     conn = sqlite3.connect(databasePath)
     c = conn.cursor()
-    #create_database if it does not exists
-    sql = """create table if not exists %s (id integer primary key AUTOINCREMENT,
-                                            pdbFileName text,
-                                            pdbLabelName text,
-                                            saved integer default 0
-                                            )""" % (table_name)
-    c.execute(sql)
+    # create_database if it does not exists
+    # in new version database is always created
+    # sqlCommand = """create table if not exists %s 
+    #                       (id integer primary key AUTOINCREMENT,
+    #                        modelId integer,
+    #                        fileName text,
+    #                        labelName text,
+    #                        type int,
+    #                        saved integer default 1
+    #                        )""" % (DATABASETABLENAME)
+    #
+    # conn.execute(sqlCommand)
+    
     # insert record
     if outLabel is None:
         outLabel = os.path.splitext(os.path.basename(outFileName))[0]
 
-    sql = 'insert into ' + table_name + """ (pdbFileName,
-                                             pdbLabelName) values
-                                            ('%s', '%s')""" % (outFileName, outLabel)
+    # sqlCommand = """INSERT INTO %s (modelId, fileName, labelName, type, saved) values
+    #                     (%d, '%s', '%s', %d)"""
+    saved = 0 # saved = 0 -> This file has not been aaded to scipion
+    sql = 'insert into ' + table_name + """ (modelId, fileName, labelName, type, saved) values
+                                            (%d, '%s', '%s', %d, %d)""" % (imol, outFileName, outLabel, type, saved)
     c.execute(sql)
 
     # commit
@@ -509,26 +575,42 @@ def storeFileNameDataBase(outFileName, outLabel=None):
     # close connection
     conn.close()
 
-def _write(outLabel=None):
+def _write(imol=0, outLabel=None):
     """write pdb file, default names
        can be overwritted using coot.ini"""
-    #imol = getOutPutFileName(mydict['imol'])
-    #outFile = getOutPutFileName(mydict['outfile'])
     dic = dict(mydict)
-    outFileName=getOutPutFileName(dic['outfile'])
+    outFileName=getOutPutFileName(dic['outfile'], imol)
     
     if outLabel is None:
         outLabel = os.path.splitext(os.path.basename(outFileName))[0]
-    else:
-        ext = os.path.splitext(outFileName)[1]
-        dir = os.path.dirname(outFileName)
-        basename = os.path.splitext(outLabel)[0]
-        outFileName = os.path.join(dir, basename + ext)
+    # else:
+    #    ext = os.path.splitext(outFileName)[1]
+    #    dir = os.path.dirname(outFileName)
+    #    basename = os.path.splitext(outLabel)[0]
+    #    outFileName = os.path.join(dir, basename + ext)
     
     dic['outfile'] = outFileName
-    command = "write_pdb_file(%(imol)s,'%(outfile)s')"%dic
-    storeFileNameDataBase(outFileName, outLabel)
-    doIt(command)
+    # command = "write_pdb_file(%(imol)s,'%(outfile)s')"%dic
+    # command = "save_coordinates(%(imol)s,'%(outfile)s')"%dic
+    # eval (doIt)  is not needed
+    save_coordinates(dic['imol'], outFileName)
+    # result = doIt(command)
+    
+    if os.path.isfile(outFileName):
+        type = TYPE_ATOMSTRUCT
+        storeFileNameDataBase(imol, outFileName, outLabel, type)
+        add_status_bar_text("Saved file " + outFileName)
+    else:
+        add_status_bar_text("I do not know how to export a 3D map. File NOT saved.")
+        dic['outfile'] = outFileName.replace(".pdb", ".mrc")
+        command = "export_map(%(imol)s,'%(outfile)s')"%dic
+        # TODO: the file is saved but it is not
+        # clear how to handle it
+        # No Scipion object will be created
+        result = doIt(command)
+        type = TYPE_3DMAP
+        
+    #store information     
     beep(0.1)
 
 def scipion_write(imol=0, outLabel=None):
@@ -536,11 +618,11 @@ def scipion_write(imol=0, outLabel=None):
     args: model number, 0 by default"""
     global mydict
     mydict['imol']=imol
-    _write(outLabel)
+    _write(imol, outLabel)
 
 def doIt(command):
     """launch command"""
-    eval(command)
+    return eval(command)
     #beep(0.1)
 
 def _printEnv():
@@ -549,7 +631,7 @@ def _printEnv():
 
 def _finishProj():
     global mydict
-    filenName = mydict['outfile']%1
+    filenName = mydict['outfile']%(1,1)
     dirPath = os.path.dirname(filenName)
     fileName = os.path.join(dirPath,"STOPPROTCOL")
     open(fileName,"w").close()
@@ -576,17 +658,40 @@ add_key_binding("print enviroment","E", lambda: _printEnv())
 add_key_binding("finish project","e", lambda: _finishProj())
 
 '''
+def getModels(outpuDataBaseNameWithLabels, table_name):
+    # open database
+    conn = sqlite3.connect(outpuDataBaseNameWithLabels)
+    if not _checkTableExists(conn, table_name):
+        conn.close()
+        return
 
+    c = conn.cursor()
+
+    # read filename and label in a loop
+    # get id of the last copy per each file
+    sqlCommand = """SELECT fileName 
+                    FROM %s  NATURAL JOIN lastid
+                    WHERE type = %d""" % \
+                    (table_name, TYPE_3DMAP)
+    c.execute(sqlCommand)
+
+    listOfMaps = []
+    for row in c:
+        listOfMaps.append(row[0])
+
+    c.execute("""SELECT fileName 
+                 FROM %s  NATURAL JOIN lastid
+                 WHERE type = %d""" %
+              (table_name, TYPE_ATOMSTRUCT))
+
+    listOfAtomStructs = []
+    for row in c:
+        listOfAtomStructs.append(row[0])
+    return listOfMaps, listOfAtomStructs
 
 def createScriptFile(imol,  # problem PDB id
-                     scriptFile,  # name of temporary script file
-                                  # loads pdbs, 3Dmap and commands defined
-                                  # by the user
-                     pdbFile,  # output PDB file
-                     listOfMaps,  # 3Dmaps to be loaded, first one is the
-                                  # reference
-                     listOfPDBs,  # PDB to be loaded, first one
-                                  # is the problem PDB
+                     scriptFile,  # name of the coot script file
+                     templateNameAtomStruct,  # default template name for new files
                      extraCommands='',  # extra commands to add at the
                                        # end of the file
                                        # mainly used for testing
@@ -594,19 +699,31 @@ def createScriptFile(imol,  # problem PDB id
                      outpuDataBaseNameWithLabels='output.db',
                      table_name='pdb'
                      ):
+
+    listOfMaps, listOfAtomStructs = getModels(outpuDataBaseNameWithLabels,
+                                              table_name)
+
     f = open(scriptFile, "w")
-    f.write(cootScriptHeader % (imol, pdbFile, cootFileName,
-                                outpuDataBaseNameWithLabels,
-                                table_name))
+    d = {'imol':imol,
+         'templateNameAtomStruct':templateNameAtomStruct,
+         'cootFileName':cootFileName,
+         'outpuDataBaseNameWithLabels':outpuDataBaseNameWithLabels,
+         'table_name':table_name,
+         'TYPE_3DMAP':TYPE_3DMAP,
+         'TYPE_ATOMSTRUCT':TYPE_ATOMSTRUCT}
+
+    f.write(cootScriptHeader.format(**d))
     f.write(cootScriptBody)
+
     # load PDB and MAP
     f.write("\n#load Atomic Structures\n")  # problem atomic structure must be
-    # model 0
-    for pdb in listOfPDBs:
-        f.write("read_pdb('%s')\n" % pdb)
+    for pdb in listOfAtomStructs:
+        f.write("read_pdb('%s')\n" % pdb) #
+
     f.write("\n#load 3D maps\n")
     for vol in listOfMaps:
         f.write("handle_read_ccp4_map('%s', 0)\n" % vol)
+
     f.write("\n#Extra Commands\n")
     f.write(extraCommands)
     f.close()
@@ -625,6 +742,7 @@ aaNumber: 100
 step: 10
 """)
         f.close()
+
 
 def _checkTableExists(dbcon, tablename):
     dbcur = dbcon.cursor()
