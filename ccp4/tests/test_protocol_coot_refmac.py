@@ -160,18 +160,18 @@ class TestImportData(TestImportBase):
         self.assertTrue(structureCoot_PDB.getFileName())
         return structureCoot_PDB
 
-    def _createExtraCommandLine(self, x, y, z, label=None):
+    def _createExtraCommandLine(self, x, y, z, label=None, imol=0):
         if label is not None:
-            writeLine = 'scipion_write(0, "%s")' % label
+            writeLine = 'scipion_write(%d, "%s")' % (imol, label)
         else:
             writeLine = 'scipion_write()'
 
         if (x != 0. or y != 0. or z != 0.):
-            return """translate_molecule_by(0, %f, %f, %f)
+            return """translate_molecule_by(%d, %f, %f, %f)
 fit_molecule_to_map_by_random_jiggle(0,7000,2)
 %s
 coot_real_exit(0)
-""" % (x, y, z, writeLine)
+""" % (imol, x, y, z, writeLine)
         else:
             return """%s
 coot_real_exit(0)
@@ -240,6 +240,51 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(os.path.exists(protCoot.testLabel.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
+
+    def testCootFlexibleFitFromUnfittedVolAndTWOPDB(self):
+        """ This test checks that coot runs with a volume provided
+        directly as inputVol, input PDB (not previously fitted with Chimera)
+        and a copy of that PDB
+         """
+        print("Run Coot fit from imported volume and TWO pdb file not fitted")
+
+        # Import Volume
+        volume = self._importVolume()
+
+        # import PDB
+        structure_PDB = self._importStructurePDBWoVol()
+
+        listVolCoot = [volume]
+        listATomStructCoot = [structure_PDB]
+        label = 'testLabel'
+        label2 = 'testLabel_2'
+        extracommands = """scipion_write(0,'%s')
+scipion_write(1,'%s')
+coot_real_exit(0)
+""" % (label, label2)
+        args = {'extraCommands': extracommands,
+                'inputVolumes': listVolCoot,
+                'inputPdbFiles': listATomStructCoot,
+                'pdbFileToBeRefined': structure_PDB,
+                'doInteractive': False
+                }
+        protCoot = self.newProtocol(CootRefine, **args)
+        protCoot.setObjLabel('coot refinement\n volume and unfitted pdb\n '
+                             'save model')
+
+        self.launchProtocol(protCoot)
+
+        # first PDB
+        self.assertIsNotNone(protCoot.testLabel.getFileName(),
+                             "There was a problem with the alignment")
+        self.assertTrue(os.path.exists(protCoot.testLabel.getFileName()))
+        # 3D map
+        self.assertTrue(
+            os.path.exists(protCoot.output3DMap_0001.getFileName()))
+        # second PDB
+        self.assertIsNotNone(protCoot.testLabel_2.getFileName(),
+                             "There was a problem with the alignment")
+        self.assertTrue(os.path.exists(protCoot.testLabel_2.getFileName()))
 
     def testCootFlexibleFitFromVolAssocToPDB(self):
 
@@ -364,9 +409,9 @@ class TestCootRefinement2(TestImportData):
             self.launchProtocol(protCoot)
         except:
             print("second call to coot ended")
-        self.assertIsNotNone(protCoot.cootOut0001.getFileName(),
+        self.assertIsNotNone(protCoot.cootImol_0000_version_0002.getFileName(),
                              "There was a problem with the alignment")
-        self.assertTrue(os.path.exists(protCoot.cootOut0001.getFileName()))
+        self.assertTrue(os.path.exists(protCoot.cootImol_0000_version_0002.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
