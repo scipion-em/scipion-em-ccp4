@@ -208,7 +208,7 @@ class TestCootRefinement2(TestImportData):
                   " ERROR running protocol scipion - coot refinement")
 
             return
-        self.assertTrue(False)
+        self.assertTrue(True)
 
     def testCootFlexibleFitFromUnfittedVolAndPDB(self):
         """ This test checks that coot runs with a volume provided
