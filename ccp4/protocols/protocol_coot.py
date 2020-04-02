@@ -368,11 +368,11 @@ the pdb file from coot  to scipion '
                 self.inputProtocol.get().getClassName().startswith("PhenixProtRunMolprobity"):
                  return errors
         else:
-            # Check that the input volume exist
-            if self.pdbFileToBeRefined.hasValue():
-                if (not self.pdbFileToBeRefined.get().hasVolume()) \
-                        and self.inputVolumes.isEmpty():
-                    errors.append("Error: You should provide a volume.\n")
+            # # Check that the input volume exist
+            # if self.pdbFileToBeRefined.hasValue():
+            #     if (not self.pdbFileToBeRefined.get().hasVolume()) \
+            #             and self.inputVolumes.isEmpty():
+            #         errors.append("Error: You should provide a volume.\n")
 
             return errors
 
