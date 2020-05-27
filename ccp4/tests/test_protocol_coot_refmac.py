@@ -199,16 +199,10 @@ class TestCootRefinement2(TestImportData):
                 }
         protCoot = self.newProtocol(CootRefine, **args)
         protCoot.setObjLabel('coot refinement\n no volume\n associated to pdb')
-
-        try:
-            self.launchProtocol(protCoot)
-        except Exception as e:
-            self.assertTrue(True)
-            print("This test should return a error message as '" \
-                  " ERROR running protocol scipion - coot refinement")
-
-            return
+        self.launchProtocol(protCoot)
         self.assertTrue(True)
+
+        # Viewer: Atomic structure used as input + atomic structure output
 
     def testCootFlexibleFitFromUnfittedVolAndPDB(self):
         """ This test checks that coot runs with a volume provided
@@ -241,12 +235,14 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structure used as input + atomic structure output
+
     def testCootFlexibleFitFromUnfittedVolAndTWOPDB(self):
         """ This test checks that coot runs with a volume provided
         directly as inputVol, input PDB (not previously fitted with Chimera)
         and a copy of that PDB
          """
-        print("Run Coot fit from imported volume and TWO pdb file not fitted")
+        print("Run Coot fit from imported volume and TWO pdb files not fitted")
 
         # Import Volume
         volume = self._importVolume()
@@ -286,6 +282,9 @@ coot_real_exit(0)
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.testLabel_2.getFileName()))
 
+        # Viewer: Input map + TWO Atomic structures used as input +
+        # TWO atomic structures as output
+
     def testCootFlexibleFitFromVolAssocToPDB(self):
 
         # This test checks that coot runs when a volume is provided
@@ -312,6 +311,9 @@ coot_real_exit(0)
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structures used as input +
+        # Atomic structures as output
+
     def testCootFlexibleFitFromVolAssocToCIF(self):
 
         # This test checks that coot runs when a volume is provided
@@ -337,6 +339,9 @@ coot_real_exit(0)
         self.assertTrue(os.path.exists(protCoot.testLabel3.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
+
+        # Viewer: Input map + Atomic structures used as input +
+        # Atomic structures as output
 
     def testCootFlexibleFitFromtwoVolAndPDB(self):
         """ This test checks that coot runs with two volumes provided
@@ -368,6 +373,9 @@ coot_real_exit(0)
         self.assertTrue(os.path.exists(protCoot.testLabel4.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
+
+        # Viewer: TWO Input map + Atomic structures used as input +
+        # Atomic structures as output
 
     def testMultipleCootFit(self):
         # This test checks that coot runs three times when a volume is provided
@@ -430,6 +438,8 @@ coot_real_exit(0)
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structures used as input +
+        # THREE Atomic structures as output
 
 class TestRefmacRefinement2(TestImportData):
     """ Test the flexible fitting of refmac refinement protocol
