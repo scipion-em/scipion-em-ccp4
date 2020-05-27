@@ -52,11 +52,12 @@ class CootRefineViewer(Viewer):
         dims = []
         samplings = []
         if len(self.protocol.inputVolumes) is 0:
-            dim = self.protocol.pdbFileToBeRefined.get().getVolume().getDim()[0]
-            sampling = self.protocol.pdbFileToBeRefined.get().getVolume().\
-                getSamplingRate()
-            dims.append(dim)
-            samplings.append(sampling)
+            if self.protocol.pdbFileToBeRefined.get().getVolume() is not None:
+                dim = self.protocol.pdbFileToBeRefined.get().getVolume().getDim()[0]
+                sampling = self.protocol.pdbFileToBeRefined.get().getVolume().\
+                    getSamplingRate()
+                dims.append(dim)
+                samplings.append(sampling)
         else:
             for i in range(len(self.protocol.inputVolumes)):
                 dim = self.protocol.inputVolumes[i].get().getDim()[0]
@@ -64,44 +65,56 @@ class CootRefineViewer(Viewer):
                     getSamplingRate()
                 dims.append(dim)
                 samplings.append(sampling)
-        Chimera.createCoordinateAxisFile(max(dims),
-                                 bildFileName=bildFileName,
-                                 sampling=max(samplings))
+        if len(dims) != 0 and len(samplings) != 0:
+            Chimera.createCoordinateAxisFile(max(dims),
+                                     bildFileName=bildFileName,
+                                     sampling=max(samplings))
+        else:
+            dim = 150.
+            sampling = 1.
+            Chimera.createCoordinateAxisFile(dim,
+                                             bildFileName=bildFileName,
+                                             sampling=sampling)
+
         fnCmd = self.protocol._getTmpPath("chimera.cmd")
         f = open(fnCmd, 'w')
         f.write("open %s\n" % bildFileName)
 
         outputsVol = []
         if len(self.protocol.inputVolumes) is 0:
-            outputVol = self.protocol.pdbFileToBeRefined.get().getVolume()
-            outputsVol.append(outputVol)
+            if self.protocol.pdbFileToBeRefined.get().getVolume() is not None:
+                outputVol = self.protocol.pdbFileToBeRefined.get().getVolume()
+                outputsVol.append(outputVol)
         else:
             for i in range(len(self.protocol.inputVolumes)):
                 outputVol = self.protocol.inputVolumes[i].get()
                 outputsVol.append(outputVol)
 
         count = 1
-        for outputVol in outputsVol:
-            outputVolFileName = os.path.abspath(
-                    ImageHandler.removeFileType(outputVol.getFileName()))
-            x, y, z = outputVol.getOrigin(force=True).getShifts()
-            f.write("open %s\n" % outputVolFileName)
-            f.write("volume #%d  style surface voxelSize %f\n"
-                    "volume #%d  origin %0.2f,%0.2f,%0.2f\n"
-                    % (count, outputVol.getSamplingRate(), count, x, y, z))
-            count += 1
+        if len(outputsVol) != 0:
+            print("outputsVol: ", outputsVol)
+            for outputVol in outputsVol:
+                outputVolFileName = os.path.abspath(
+                        ImageHandler.removeFileType(outputVol.getFileName()))
+                x, y, z = outputVol.getOrigin(force=True).getShifts()
+                f.write("open %s\n" % outputVolFileName)
+                f.write("volume #%d  style surface voxelSize %f\n"
+                        "volume #%d  origin %0.2f,%0.2f,%0.2f\n"
+                        % (count, outputVol.getSamplingRate(), count, x, y, z))
+                count += 1
 
         counter = 1
         template = self.protocol._getExtraPath(COOTPDBTEMPLATEFILENAME)
         databasePath = self.protocol._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
         conn = sqlite3.connect(databasePath)
         c = conn.cursor()
-        sql = 'SELECT pdbFileName FROM %s where saved = 1 order by id' % \
+        sql = 'SELECT fileName FROM %s where saved = 1 order by id' % \
               DATABASETABLENAME
         c.execute(sql)
         for row in c:
             pdbFileName = os.path.abspath(row[0])
-            f.write("open %s\n" % pdbFileName)
+            if not pdbFileName.endswith(".mrc"):
+                f.write("open %s\n" % pdbFileName)
 
         f.close()
         conn.close()
