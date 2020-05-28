@@ -44,7 +44,7 @@ import sqlite3
 
 # template for new atomic models, first ID is the coot model id
 # the second id increases for each time the model is saved
-COOTPDBTEMPLATEFILENAME = "cootImol_%04d_version_%04d.pdb" # modelID, counter
+COOTPDBTEMPLATEFILENAME = "coot_%06d_Imol_%04d_version_%04d.pdb" # protId, modelID, counter
 # filename for coot script file
 COOTSCRIPTFILENAME = "cootScript.py"
 # database that stores filenames and corresponding models
@@ -260,7 +260,8 @@ the pdb file from coot  to scipion '
                          self.extraCommands.get(),
                          self._getExtraPath(self.COOTINI),  # coot.ini
                          databasePath,
-                         table_name=DATABASETABLENAME
+                         table_name=DATABASETABLENAME,
+                         protId=self.getObjId()
                          )
 
         args = ""
@@ -457,6 +458,7 @@ databasePath='{outpuDataBaseNameWithLabels}'
 table_name = '{table_name}'
 TYPE_3DMAP = {TYPE_3DMAP}
 TYPE_ATOMSTRUCT = {TYPE_ATOMSTRUCT}
+protId={protId}
 '''
 
 cootScriptBody = '''
@@ -537,10 +539,10 @@ def getOutPutFileName(template, imol):
     %04d will be incremented untill it does not exists"""
     counter=1
     if "%04d" in template:
-        while os.path.isfile(template%(imol, counter)):
+        while os.path.isfile(template%(protId, imol, counter)):
              counter += 1
 
-    return template % (imol, counter)
+    return template % (protId, imol, counter)
 
 def storeFileNameDataBase(imol, outFileName, outLabel=None, type=TYPE_ATOMSTRUCT):
     import sqlite3
@@ -697,7 +699,8 @@ def createScriptFile(imol,  # problem PDB id
                                        # mainly used for testing
                      cootFileName='/tmp/coot.ini',
                      outpuDataBaseNameWithLabels='output.db',
-                     table_name='pdb'
+                     table_name='pdb',
+                     protId=0
                      ):
 
     listOfMaps, listOfAtomStructs = getModels(outpuDataBaseNameWithLabels,
@@ -710,7 +713,8 @@ def createScriptFile(imol,  # problem PDB id
          'outpuDataBaseNameWithLabels':outpuDataBaseNameWithLabels,
          'table_name':table_name,
          'TYPE_3DMAP':TYPE_3DMAP,
-         'TYPE_ATOMSTRUCT':TYPE_ATOMSTRUCT}
+         'TYPE_ATOMSTRUCT':TYPE_ATOMSTRUCT,
+         'protId':protId}
 
     f.write(cootScriptHeader.format(**d))
     f.write(cootScriptBody)

@@ -417,9 +417,9 @@ coot_real_exit(0)
             self.launchProtocol(protCoot)
         except:
             print("second call to coot ended")
-        self.assertIsNotNone(protCoot.cootImol_0000_version_0002.getFileName(),
+        self.assertIsNotNone(protCoot.coot_000941_Imol_0000_version_0002.getFileName(),
                              "There was a problem with the alignment")
-        self.assertTrue(os.path.exists(protCoot.cootImol_0000_version_0002.getFileName()))
+        self.assertTrue(os.path.exists(protCoot.coot_000941_Imol_0000_version_0002.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
@@ -725,9 +725,9 @@ class TestRefmacRefinement2(TestImportData):
             self.launchProtocol(protCoot)
         except:
             print("second call to coot ended")
-        self.assertIsNotNone(protCoot.cootImol_0000_version_0002.getFileName(),
+        self.assertIsNotNone(protCoot.coot_001183_Imol_0000_version_0002.getFileName(),
                              "There was a problem with the alignment")
-        self.assertTrue(os.path.exists(protCoot.cootImol_0000_version_0002.getFileName()))
+        self.assertTrue(os.path.exists(protCoot.coot_001183_Imol_0000_version_0002.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
