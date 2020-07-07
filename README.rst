@@ -2,7 +2,7 @@
 CCP4 scipion plugin
 ===================
 
-This plugin allows to use CCP4 programs within the Scipion framework.
+This plugin allows to use CCP4 programs within the Scipion framework. **You need to install the CCP4 suite before installing the plugin**, see section "Binary Files" for details.
 
 CCP4, from Collaborative Computational Project Number 4, is a software suite that allows model building of macromolecule structures obtained by X-ray crystallography, and that has been extended to other techniques like cryo-EM (see `CCP4 home page <http://www.ccp4.ac.uk/>`_ for details).
 
@@ -45,7 +45,7 @@ OR
 
 - **Binary files** 
 
-CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recommend to install CCP4 version 7.0.056 or higher.
+CCP4 binaries will *NOT* be installed automatically with the plugin. The independent installation of CCP4 software suite by the user is required before running the programs. Default installation path assumed is */usr/local/ccp4-7.0*; this path or any other of your preference has to be set in *CCP4_HOME* in *scipion.conf*. We recommend to install CCP4 version 7.0.056 or higher. (see http://www.ccp4.ac.uk/download/#os=linux)
 
 
 

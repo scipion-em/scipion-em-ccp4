@@ -26,8 +26,8 @@
 # refmac)
 
 import os.path
-from pyworkflow.em.protocol.protocol_import import (ProtImportPdb,
-                                                    ProtImportVolumes)
+from pwem.protocols.protocol_import import (ProtImportPdb,
+                                            ProtImportVolumes)
 from ccp4.protocols import CootRefine, CCP4ProtRunRefmac
 from pyworkflow.tests import *
 
@@ -160,18 +160,18 @@ class TestImportData(TestImportBase):
         self.assertTrue(structureCoot_PDB.getFileName())
         return structureCoot_PDB
 
-    def _createExtraCommandLine(self, x, y, z, label=None):
+    def _createExtraCommandLine(self, x, y, z, label=None, imol=0):
         if label is not None:
-            writeLine = 'scipion_write(0, "%s")' % label
+            writeLine = 'scipion_write(%d, "%s")' % (imol, label)
         else:
             writeLine = 'scipion_write()'
 
         if (x != 0. or y != 0. or z != 0.):
-            return """translate_molecule_by(0, %f, %f, %f)
+            return """translate_molecule_by(%d, %f, %f, %f)
 fit_molecule_to_map_by_random_jiggle(0,7000,2)
 %s
 coot_real_exit(0)
-""" % (x, y, z, writeLine)
+""" % (imol, x, y, z, writeLine)
         else:
             return """%s
 coot_real_exit(0)
@@ -185,8 +185,8 @@ class TestCootRefinement2(TestImportData):
     def testCootFlexibleFitFromPDB(self):
         """ This test checks that coot runs with an atomic structure;
          No Volume was provided and an error message is expected"""
-        print "Run Coot fit from imported pdb file without imported or " \
-              "pdb-associated volume"
+        print("Run Coot fit from imported pdb file without imported or " \
+              "pdb-associated volume")
 
         # import PDB
         structure_PDB = self._importStructurePDBWoVol()
@@ -199,22 +199,16 @@ class TestCootRefinement2(TestImportData):
                 }
         protCoot = self.newProtocol(CootRefine, **args)
         protCoot.setObjLabel('coot refinement\n no volume\n associated to pdb')
+        self.launchProtocol(protCoot)
+        self.assertTrue(True)
 
-        try:
-            self.launchProtocol(protCoot)
-        except Exception as e:
-            self.assertTrue(True)
-            print "This test should return a error message as '" \
-                  " ERROR running protocol scipion - coot refinement"
-
-            return
-        self.assertTrue(False)
+        # Viewer: Atomic structure used as input + atomic structure output
 
     def testCootFlexibleFitFromUnfittedVolAndPDB(self):
         """ This test checks that coot runs with a volume provided
         directly as inputVol, input PDB (not previously fitted with Chimera)
          """
-        print "Run Coot fit from imported volume and pdb file not fitted"
+        print("Run Coot fit from imported volume and pdb file not fitted")
 
         # Import Volume
         volume = self._importVolume()
@@ -241,11 +235,61 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structure used as input + atomic structure output
+
+    def testCootFlexibleFitFromUnfittedVolAndTWOPDB(self):
+        """ This test checks that coot runs with a volume provided
+        directly as inputVol, input PDB (not previously fitted with Chimera)
+        and a copy of that PDB
+         """
+        print("Run Coot fit from imported volume and TWO pdb files not fitted")
+
+        # Import Volume
+        volume = self._importVolume()
+
+        # import PDB
+        structure_PDB = self._importStructurePDBWoVol()
+
+        listVolCoot = [volume]
+        listATomStructCoot = [structure_PDB]
+        label = 'testLabel'
+        label2 = 'testLabel_2'
+        extracommands = """scipion_write(0,'%s')
+scipion_write(1,'%s')
+coot_real_exit(0)
+""" % (label, label2)
+        args = {'extraCommands': extracommands,
+                'inputVolumes': listVolCoot,
+                'inputPdbFiles': listATomStructCoot,
+                'pdbFileToBeRefined': structure_PDB,
+                'doInteractive': False
+                }
+        protCoot = self.newProtocol(CootRefine, **args)
+        protCoot.setObjLabel('coot refinement\n volume and unfitted pdb\n '
+                             'save model')
+
+        self.launchProtocol(protCoot)
+
+        # first PDB
+        self.assertIsNotNone(protCoot.testLabel.getFileName(),
+                             "There was a problem with the alignment")
+        self.assertTrue(os.path.exists(protCoot.testLabel.getFileName()))
+        # 3D map
+        self.assertTrue(
+            os.path.exists(protCoot.output3DMap_0001.getFileName()))
+        # second PDB
+        self.assertIsNotNone(protCoot.testLabel_2.getFileName(),
+                             "There was a problem with the alignment")
+        self.assertTrue(os.path.exists(protCoot.testLabel_2.getFileName()))
+
+        # Viewer: Input map + TWO Atomic structures used as input +
+        # TWO atomic structures as output
+
     def testCootFlexibleFitFromVolAssocToPDB(self):
 
         # This test checks that coot runs when a volume is provided
         # associated to the input PDB
-        print "Run Coot fit from imported pdb file and volume associated "
+        print("Run Coot fit from imported pdb file and volume associated ")
 
         # import PDB
         structure2_PDB = self._importStructurePDBWithVol()
@@ -267,11 +311,14 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structures used as input +
+        # Atomic structures as output
+
     def testCootFlexibleFitFromVolAssocToCIF(self):
 
         # This test checks that coot runs when a volume is provided
         # associated to the input CIF
-        print "Run Coot fit from imported cif file and volume associated "
+        print("Run Coot fit from imported cif file and volume associated ")
 
         # import PDB
         structure_mmCIF = self._importStructuremmCIFWithVol()
@@ -293,10 +340,13 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structures used as input +
+        # Atomic structures as output
+
     def testCootFlexibleFitFromtwoVolAndPDB(self):
         """ This test checks that coot runs with two volumes provided
         directly as inputVol, input PDB """
-        print "Run Coot fit from imported volume and pdb file"
+        print("Run Coot fit from imported volume and pdb file")
 
         # Import Volume
         volume = self._importVolume()
@@ -324,11 +374,14 @@ class TestCootRefinement2(TestImportData):
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: TWO Input map + Atomic structures used as input +
+        # Atomic structures as output
+
     def testMultipleCootFit(self):
         # This test checks that coot runs three times when a volume is provided
         # associated to the input PDB file
         # starting volume with a different coordinate origin
-        print "Run Coot fit from PDB file multiple times"
+        print("Run Coot fit from PDB file multiple times")
 
         volume2 = self._importVolume2()
         structure1_PDB = self._importStructurePDBWoVol()
@@ -348,8 +401,8 @@ class TestCootRefinement2(TestImportData):
 
         try:
             self.launchProtocol(protCoot)
-        except:
-            print "first call to coot ended"
+        except Exception as e:
+            print("first call to coot ended. ", e)
         self.assertIsNotNone(protCoot.testLabel5.getFileName(),
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.testLabel5.getFileName()))
@@ -363,10 +416,10 @@ class TestCootRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except:
-            print "second call to coot ended"
-        self.assertIsNotNone(protCoot.cootOut0001.getFileName(),
+            print("second call to coot ended")
+        self.assertIsNotNone(protCoot.coot_000941_Imol_0000_version_0002.getFileName(),
                              "There was a problem with the alignment")
-        self.assertTrue(os.path.exists(protCoot.cootOut0001.getFileName()))
+        self.assertTrue(os.path.exists(protCoot.coot_000941_Imol_0000_version_0002.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
@@ -378,13 +431,15 @@ class TestCootRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except:
-            print "third call to coot ended"
+            print("third call to coot ended")
         self.assertIsNotNone(protCoot.lastTestLabel.getFileName(),
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.lastTestLabel.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
+        # Viewer: Input map + Atomic structures used as input +
+        # THREE Atomic structures as output
 
 class TestRefmacRefinement2(TestImportData):
     """ Test the flexible fitting of refmac refinement protocol
@@ -393,8 +448,8 @@ class TestRefmacRefinement2(TestImportData):
     def testRefmacFlexibleFitFromPDB(self):
         """ This test checks that refmac runs with an atomic structure;
          No Volume was provided and an error message is expected"""
-        print "Run Refmac refinement from imported pdb file without" \
-              "imported or pdb-associated volume"
+        print("Run Refmac refinement from imported pdb file without" \
+              "imported or pdb-associated volume")
 
         # import PDB
         structure_PDB = self._importStructurePDBWoVol()
@@ -411,8 +466,8 @@ class TestRefmacRefinement2(TestImportData):
             self.launchProtocol(protRefmac)
         except Exception as e:
             self.assertTrue(True)
-            print "This test should return a error message as '" \
-                  " ERROR running protocol scipion - refmac refinement"
+            print("This test should return a error message as '" \
+                  " ERROR running protocol scipion - refmac refinement")
 
             return
         self.assertTrue(False)
@@ -421,8 +476,8 @@ class TestRefmacRefinement2(TestImportData):
         """ This test checks that refmac runs with a volume provided
         directly as inputVol and an input PDB (refmac without mask)
          """
-        print "Run Refmac refinement withouth mask from imported volume and " \
-              "pdb file"
+        print("Run Refmac refinement withouth mask from imported volume and " \
+              "pdb file")
 
         # Import Volume
         volume = self._importVolume2()
@@ -449,8 +504,8 @@ class TestRefmacRefinement2(TestImportData):
         """ This test checks that refmac runs with a volume associated to an
         input CIF (refmac with mask)
          """
-        print "Run MASK Refmac refinement withouth mask from associated " \
-              "volume to a cif file"
+        print("Run MASK Refmac refinement withouth mask from associated " \
+              "volume to a cif file")
 
         # import PDB
         structure_PDB = self._importStructuremmCIFWithVol2()
@@ -474,8 +529,8 @@ class TestRefmacRefinement2(TestImportData):
         directly as inputVol, the input PDB was fitted to the volume and
         refined previously by coot (refmac without mask)
          """
-        print "Run Refmac refinement withouth mask from imported volume and " \
-              "pdb file fitted and refined by Coot"
+        print("Run Refmac refinement withouth mask from imported volume and " \
+              "pdb file fitted and refined by Coot")
 
         # Import Volume
         volume = self._importVolume()
@@ -516,8 +571,8 @@ class TestRefmacRefinement2(TestImportData):
         directly as inputVol, the input PDB was fitted to the volume and
         refined previously by coot (refmac with mask)
          """
-        print "Run MASK Refmac refinement withouth mask from imported " \
-              "volume and pdb file fitted and refined by Coot"
+        print("Run MASK Refmac refinement withouth mask from imported " \
+              "volume and pdb file fitted and refined by Coot")
 
         # Import Volume
         volume = self._importVolume()
@@ -559,8 +614,8 @@ class TestRefmacRefinement2(TestImportData):
         associated volume and
         refined previously by coot (refmac without mask)
          """
-        print "Run Refmac refinement withouth mask from imported " \
-              "pdb file (volume associated) fitted and refined by Coot"
+        print("Run Refmac refinement withouth mask from imported " \
+              "pdb file (volume associated) fitted and refined by Coot")
 
         # import PDB
         structure_PDB = self._importStructurePDBWithVol2()
@@ -597,8 +652,8 @@ class TestRefmacRefinement2(TestImportData):
         directly as inputVol, the input PDB was fitted to the volume and
         refined previously by coot (refmac with mask)
          """
-        print "Run MASK Refmac refinement withouth mask from imported " \
-              "volume and pdb file fitted and refined by Coot"
+        print("Run MASK Refmac refinement withouth mask from imported " \
+              "volume and pdb file fitted and refined by Coot")
 
         # import PDB
         structure_PDB = self._importStructurePDBWithVol2()
@@ -633,8 +688,8 @@ class TestRefmacRefinement2(TestImportData):
     def testRefmacRefinementAfterMultipleCootFit(self):
         # This test checks that refmac runs when a volume and a pdb provided
         # by Coot (three runs) with or without mask
-        print "Run Refmac refinement from PDB file saved from " \
-              "Coot (3 runs) with or without mask"
+        print("Run Refmac refinement from PDB file saved from " \
+              "Coot (3 runs) with or without mask")
 
         volume2 = self._importVolume2()
         structure1_PDB = self._importStructurePDBWoVol()
@@ -655,7 +710,7 @@ class TestRefmacRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except:
-            print "first call to coot ended"
+            print("first call to coot ended")
         self.assertIsNotNone(protCoot.testLabel5.getFileName(),
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.testLabel5.getFileName()))
@@ -669,10 +724,10 @@ class TestRefmacRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except:
-            print "second call to coot ended"
-        self.assertIsNotNone(protCoot.cootOut0001.getFileName(),
+            print("second call to coot ended")
+        self.assertIsNotNone(protCoot.coot_001183_Imol_0000_version_0002.getFileName(),
                              "There was a problem with the alignment")
-        self.assertTrue(os.path.exists(protCoot.cootOut0001.getFileName()))
+        self.assertTrue(os.path.exists(protCoot.coot_001183_Imol_0000_version_0002.getFileName()))
         self.assertTrue(
             os.path.exists(protCoot.output3DMap_0001.getFileName()))
 
@@ -684,7 +739,7 @@ class TestRefmacRefinement2(TestImportData):
         try:
             self.launchProtocol(protCoot)
         except:
-            print "third call to coot ended"
+            print("third call to coot ended")
         self.assertIsNotNone(protCoot.lastTestLabel.getFileName(),
                              "There was a problem with the alignment")
         self.assertTrue(os.path.exists(protCoot.lastTestLabel.getFileName()))

@@ -29,17 +29,17 @@ import stat
 import pyworkflow.protocol.constants as const
 from pyworkflow import VERSION_1_2
 try:
-    from pyworkflow.em.data import AtomStruct
+    from pwem.objects import AtomStruct
 except:
-    from pyworkflow.em.data import PdbFile as AtomStruct
-from pyworkflow.em.convert.headers import Ccp4Header
+    from pwem.objects import PdbFile as AtomStruct
+from pwem.convert.headers import Ccp4Header
 from ccp4 import Plugin
 from ccp4.convert import (runCCP4Program, validVersion)
-from refmac_template_map2mtz import \
+from .refmac_template_map2mtz import \
     template_refmac_preprocess_NOMASK, template_refmac_preprocess_MASK
-from refmac_template_refine \
+from .refmac_template_refine \
     import template_refmac_refine_MASK, template_refmac_refine_NOMASK
-from pyworkflow.em.protocol import EMProtocol
+from pwem.protocols import EMProtocol
 from pyworkflow.protocol.params import PointerParam, IntParam, FloatParam, \
     BooleanParam, StringParam
 from ccp4.constants import CCP4_BINARIES
