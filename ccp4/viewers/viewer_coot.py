@@ -76,7 +76,7 @@ class CootRefineViewer(Viewer):
                                              bildFileName=bildFileName,
                                              sampling=sampling)
 
-        fnCmd = self.protocol._getTmpPath("chimera.cmd")
+        fnCmd = self.protocol._getTmpPath("chimera.cxc")
         f = open(fnCmd, 'w')
         f.write("open %s\n" % bildFileName)
 
@@ -90,9 +90,8 @@ class CootRefineViewer(Viewer):
                 outputVol = self.protocol.inputVolumes[i].get()
                 outputsVol.append(outputVol)
 
-        count = 1
+        count = 2
         if len(outputsVol) != 0:
-            print("outputsVol: ", outputsVol)
             for outputVol in outputsVol:
                 outputVolFileName = os.path.abspath(
                         ImageHandler.removeFileType(outputVol.getFileName()))
@@ -103,8 +102,8 @@ class CootRefineViewer(Viewer):
                         % (count, outputVol.getSamplingRate(), count, x, y, z))
                 count += 1
 
-        counter = 1
-        template = self.protocol._getExtraPath(COOTPDBTEMPLATEFILENAME)
+        # counter = 1
+        # template = self.protocol._getExtraPath(COOTPDBTEMPLATEFILENAME)
         databasePath = self.protocol._getExtraPath(OUTPUTDATABASENAMESWITHLABELS)
         conn = sqlite3.connect(databasePath)
         c = conn.cursor()
