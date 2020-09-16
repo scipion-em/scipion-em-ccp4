@@ -705,8 +705,6 @@ def createScriptFile(imol,  # problem PDB id
 
     listOfMaps, listOfAtomStructs = getModels(outpuDataBaseNameWithLabels,
                                               table_name)
-    print("listOfMaps: ", listOfMaps)
-    print("listOfAtomStructs: ", listOfAtomStructs)
 
     f = open(scriptFile, "w")
     d = {'imol':imol,
@@ -724,12 +722,10 @@ def createScriptFile(imol,  # problem PDB id
     # load PDB and MAP
     f.write("\n#load Atomic Structures\n")  # problem atomic structure must be
     for pdb in listOfAtomStructs:
-        print("pdb: ", pdb)
         f.write("read_pdb('%s')\n" % pdb) #
 
     f.write("\n#load 3D maps\n")
     for vol in listOfMaps:
-        print("vol: ", vol)
         f.write("handle_read_ccp4_map('%s', 0)\n" % vol)
 
     f.write("\n#Extra Commands\n")
