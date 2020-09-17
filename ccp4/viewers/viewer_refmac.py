@@ -418,6 +418,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
         f = open(fnCmd, 'w')
         # reference axis model = 0
         f.write("open %s\n" % bildFileName)
+        f.write("cofr 0,0,0\n")
 
         # input 3D map
         counter += 1  # 2

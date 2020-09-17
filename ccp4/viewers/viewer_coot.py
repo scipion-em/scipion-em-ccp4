@@ -79,6 +79,7 @@ class CootRefineViewer(Viewer):
         fnCmd = self.protocol._getTmpPath("chimera.cxc")
         f = open(fnCmd, 'w')
         f.write("open %s\n" % bildFileName)
+        f.write("cofr 0,0,0\n")
 
         outputsVol = []
         if len(self.protocol.inputVolumes) is 0:
