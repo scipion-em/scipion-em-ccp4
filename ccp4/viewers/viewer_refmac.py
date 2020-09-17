@@ -381,8 +381,8 @@ and rmsCHIRAL (root mean square of chiral index.""")
             dim, _, _ = ccp4header.getDims()
             x, y, z = ccp4header.getOrigin()
             sampling, _, _ = ccp4header.getSampling()
-            counter = 0
-            fnCmd = self.protocol._getTmpPath("chimera_mask.cmd")
+            counter = 1
+            fnCmd = self.protocol._getTmpPath("chimera_mask.cxc")
             f = open(fnCmd, 'w')
             maskFileName = os.path.abspath(maskedMapFileName)
             f.write("open %s\n" % maskFileName)
@@ -413,14 +413,15 @@ and rmsCHIRAL (root mean square of chiral index.""")
         Chimera.createCoordinateAxisFile(dim,
                                  bildFileName=bildFileName,
                                  sampling=sampling)
-        counter = 0
-        fnCmd = self.protocol._getTmpPath("chimera_output.cmd")
+        counter = 1
+        fnCmd = self.protocol._getTmpPath("chimera_output.cxc")
         f = open(fnCmd, 'w')
         # reference axis model = 0
         f.write("open %s\n" % bildFileName)
+        f.write("cofr 0,0,0\n")
 
         # input 3D map
-        counter += 1  # 1
+        counter += 1  # 2
         fnVol = self.protocol._getInputVolume()
         fnVolName = os.path.abspath(fnVol.getFileName())
         if fnVolName.endswith(":mrc"):
@@ -432,13 +433,13 @@ and rmsCHIRAL (root mean square of chiral index.""")
                 "%0.2f,%0.2f,%0.2f\n" % (counter, sampling, counter, x, y, z))
 
         # input PDB (usually from coot)
-        counter += 1  # 2
+        counter += 1  # 3
         pdbFileName = os.path.abspath(
             self.protocol.inputStructure.get().getFileName())
         f.write("open %s\n" % pdbFileName)
 
         # second refmac step output -> refined PDB
-        counter += 1  # 3
+        counter += 1  # 4
         pdbFileName = os.path.abspath(self.protocol.outputPdb.getFileName())
         f.write("open %s\n" % pdbFileName)
 

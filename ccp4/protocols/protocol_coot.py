@@ -414,7 +414,7 @@ the pdb file from coot  to scipion '
         inVolumes = []
         norVolumesNames = []
         # if self.inputVolumes is None:
-        if len(self.inputVolumes) is 0:
+        if len(self.inputVolumes) == 0:
             if self.pdbFileToBeRefined.get().getVolume() is not None:
                 vol = self.pdbFileToBeRefined.get().getVolume()
                 inFileName = vol.getFileName()
