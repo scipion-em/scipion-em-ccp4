@@ -25,10 +25,6 @@
 # *
 # **************************************************************************
 """
-Bibtex string file for Gautomatch package.
-"""
-
-_bibtexStr = """
 @article{Winn_2011,
    Author="Winn, M. D.  and Ballard, C. C.  and Cowtan, K. D.  and Dodson, E. J.  and Emsley, P.  and Evans, P. R.  and Keegan, R. M.  and Krissinel, E. B.  and Leslie, A. G.  and McCoy, A.  and McNicholas, S. J.  and Murshudov, G. N.  and Pannu, N. S.  and Potterton, E. A.  and Powell, H. R.  and Read, R. J.  and Vagin, A.  and Wilson, K. S. ",
    Title="{{O}verview of the {C}{C}{P}4 suite and current developments}",
@@ -67,7 +63,3 @@ _bibtexStr = """
 }
 
 """
-
-from pyworkflow.utils import parseBibTex
-
-_bibtex = parseBibTex(_bibtexStr)  

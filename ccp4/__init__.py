@@ -162,6 +162,3 @@ class Plugin(pwem.Plugin):
                           "Please, install CCP4 software suite (see %s)" % (programName, CCP4_URL)
         else:
             return True, ""
-
-
-pwem.Domain.registerPlugin(__name__)
