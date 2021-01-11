@@ -48,7 +48,7 @@ class CootRefineViewer(Viewer):
     def _visualize(self, obj, **args):
             # TODO if input volume is not mrc this will not work.
         # Construct the coordinate file and visualization
-        bildFileName = os.path.abspath(self.protocol._getTmpPath("axis.bild"))
+        bildFileName = os.path.abspath(self.protocol._getExtraPath("axis.bild"))
         dims = []
         samplings = []
         if len(self.protocol.inputVolumes) is 0:
@@ -76,7 +76,7 @@ class CootRefineViewer(Viewer):
                                              bildFileName=bildFileName,
                                              sampling=sampling)
 
-        fnCmd = self.protocol._getTmpPath("chimera.cxc")
+        fnCmd = self.protocol._getExtraPath("chimera.cxc")
         f = open(fnCmd, 'w')
         f.write("open %s\n" % bildFileName)
         f.write("cofr 0,0,0\n")
