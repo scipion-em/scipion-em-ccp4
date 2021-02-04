@@ -32,7 +32,7 @@ from ccp4.constants import *
 
 _references = ['Winn_2011']
 _logo = "ccp4_200.png"
-__version__ = "3.0.1"
+__version__ = "3.0.2"
 
 class Plugin(pwem.Plugin):
     _homeVar = CCP4_HOME_VARNAME
@@ -162,6 +162,3 @@ class Plugin(pwem.Plugin):
                           "Please, install CCP4 software suite (see %s)" % (programName, CCP4_URL)
         else:
             return True, ""
-
-
-pwem.Domain.registerPlugin(__name__)
