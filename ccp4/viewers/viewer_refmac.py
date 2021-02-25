@@ -382,7 +382,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
             x, y, z = ccp4header.getOrigin()
             sampling, _, _ = ccp4header.getSampling()
             counter = 1
-            fnCmd = self.protocol._getTmpPath("chimera_mask.cxc")
+            fnCmd = self.protocol._getExtraPath("chimera_mask.cxc")
             f = open(fnCmd, 'w')
             maskFileName = os.path.abspath(maskedMapFileName)
             f.write("open %s\n" % maskFileName)
@@ -401,7 +401,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
         return []
 
     def _visualizeMapModel(self, e=None):
-        bildFileName = os.path.abspath(self.protocol._getTmpPath(
+        bildFileName = os.path.abspath(self.protocol._getExtraPath(
             "axis_output.bild"))
         if self.protocol.inputVolume.get() is None:
             _inputVol = self.protocol.inputStructure.get().getVolume()
@@ -414,7 +414,7 @@ and rmsCHIRAL (root mean square of chiral index.""")
                                  bildFileName=bildFileName,
                                  sampling=sampling)
         counter = 1
-        fnCmd = self.protocol._getTmpPath("chimera_output.cxc")
+        fnCmd = self.protocol._getExtraPath("chimera_output.cxc")
         f = open(fnCmd, 'w')
         # reference axis model = 0
         f.write("open %s\n" % bildFileName)
