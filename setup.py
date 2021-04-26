@@ -11,6 +11,8 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 from ccp4 import __version__
+from os import path
+
 
 here = path.abspath(path.dirname(__file__))
 
