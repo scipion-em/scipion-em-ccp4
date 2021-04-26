@@ -1,4 +1,4 @@
-# coding: latin-1
+# coding: utf-8
 # **************************************************************************
 # *
 # * Authors:     Roberto Marabini (roberto@cnb.csic.es)
