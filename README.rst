@@ -101,12 +101,3 @@ Version in Pypi
 .. image:: https://img.shields.io/pypi/v/scipion-em-ccp4.svg
         :target: https://pypi.python.org/pypi/scipion-em-ccp4
         :alt: PyPI release
-
-
-.. image:: https://img.shields.io/sonar/quality_gate/scipion-em_scipion-em-ccp4?server=https%3A%2F%2Fsonarcloud.io
-        :target: https://sonarcloud.io/dashboard?id=scipion-em_scipion-em-ccp4
-        :alt: SonarCloud quality gate
-
-.. image:: https://img.shields.io/pypi/dm/scipion-em-ccp4
-        :target: https://pypi.python.org/pypi/scipion-em-ccp4
-        :alt: Downloads
