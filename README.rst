@@ -96,17 +96,12 @@ Status production version:
 
 .. image:: http://scipion-test.cnb.csic.es:9980/badges/ccp4_prod.svg
 
+Version in Pypi
+
 .. image:: https://img.shields.io/pypi/v/scipion-em-ccp4.svg
         :target: https://pypi.python.org/pypi/scipion-em-ccp4
         :alt: PyPI release
 
-.. image:: https://img.shields.io/pypi/l/scipion-em-ccp4.svg
-        :target: https://pypi.python.org/pypi/scipion-em-ccp4
-        :alt: License
-
-.. image:: https://img.shields.io/pypi/pyversions/scipion-em-ccp4.svg
-        :target: https://pypi.python.org/pypi/scipion-em-ccp4
-        :alt: Supported Python versions
 
 .. image:: https://img.shields.io/sonar/quality_gate/scipion-em_scipion-em-ccp4?server=https%3A%2F%2Fsonarcloud.io
         :target: https://sonarcloud.io/dashboard?id=scipion-em_scipion-em-ccp4
