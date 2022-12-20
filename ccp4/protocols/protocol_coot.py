@@ -524,7 +524,7 @@ def _updateMol():
         """open text file with default editor
         """
         p=subprocess.Popen(('xdg-open', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
+    open_xdg(os.environ.get('COOT_INI',cootPath))
     global mydict
     config = ConfigParser.ConfigParser()
     config.read(os.environ.get('COOT_INI',cootPath))
