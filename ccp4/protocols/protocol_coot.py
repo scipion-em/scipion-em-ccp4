@@ -627,11 +627,11 @@ def _write(imol=-1, outLabel=None):
     if os.path.isfile(outFileName):
         type = TYPE_ATOMSTRUCT
         storeFileNameDataBase(imol, outFileName, outLabel, type)
-        add_status_bar_text(f"Saved imol: {aa_imol} as {outFileName})
+        add_status_bar_text("Saved imol: %(imol)s as %(outfile)s" % dic)
     else:
         add_status_bar_text("I do not know how to export a 3D map. File NOT saved.")
         dic['outfile'] = outFileName.replace(".pdb", ".mrc")
-        command = "export_map(%(imol)s,'%(outfile)s')"%dic
+        command = "export_map(%(imol)s,'%(outfile)s')" % dic
         # TODO: the file is saved but it is not
         # clear how to handle it
         # No Scipion object will be created
