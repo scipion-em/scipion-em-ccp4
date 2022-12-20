@@ -674,7 +674,7 @@ print("Loading Scipion Coot extensions...")
 menubar = coot_python.main_menubar()
 toolbar = coot_python.main_toolbar()
 menu = coot_menubar_menu("Scipion")
-add_simple_coot_menu_menuitem(menu, "write model", lambda func: _write(imol = -1))
+add_simple_coot_menu_menuitem(menu, "write last active model", lambda func: _write(imol = -1))
 add_simple_coot_menu_menuitem(menu, "end protocol", lambda func: _finishProj())
 add_simple_coot_menu_menuitem(menu, "update cootini", lambda func: _updateMol())
 
@@ -722,7 +722,7 @@ def getModels(outpuDataBaseNameWithLabels, table_name):
 
     c.execute("""SELECT fileName 
                  FROM %s  NATURAL JOIN lastid
-                 WHERE type = %d ORDER BY id desc""" %
+                 WHERE type = %d """ %
               (table_name, TYPE_ATOMSTRUCT))
 
     listOfAtomStructs = []
@@ -763,6 +763,7 @@ def createScriptFile(imol,  # problem PDB id
     f.write("\n#load Atomic Structures\n")  # problem atomic structure must be
     for pdb in listOfAtomStructs:
         f.write("read_pdb('%s')\n" % pdb) #
+        f.write("set_mol_active(%d, %d)\n" % (imol_counter, imol_counter > 0))
         imol_counter += 1
 
     f.write("\n#load 3D maps\n")
