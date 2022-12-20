@@ -622,7 +622,7 @@ def _write(imol=-1, outLabel=None):
     #    outFileName = os.path.join(dir, basename + ext)
     
     dic['outfile'] = outFileName
-    save_coordinates(dic[aa_imol], outFileName)
+    save_coordinates(dic['imol'], outFileName)
     
     if os.path.isfile(outFileName):
         type = TYPE_ATOMSTRUCT
