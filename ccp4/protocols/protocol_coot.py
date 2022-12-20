@@ -521,25 +521,9 @@ def _updateMol():
     called protocolDirectory/extra/coot.ini"""
 
     def open_xdg(my_file):
-        """awfull function to open a text file with the default application.
-        Unfortunatelly, gedit does not work in the phenix enviroment.
-        I guess more libraries are needed in LD_LIBRARY_PATH
+        """open text file with default editor
         """
         p=subprocess.Popen(('xdg-open', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        output, err = p.communicate(b"input data that is passed to subprocess' stdin")
-        # if error try nedit since does not depend on other libraries
-        if err.find('error')!=-1:
-            print("xdg-open failed, try nedit")
-            p=subprocess.Popen(('nedit', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output, err = p.communicate(b"input data that is passed to subprocess' stdin")
-            # nedit not installed let us try nano
-            if err.find('error')!=-1:
-                print("nedit failed, try nano")
-                p=subprocess.Popen(('nano', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                # nano not installed let us try vi
-                if err.find('error')!=-1:
-                    print("nano failed, try vi")
-                    p=subprocess.Popen(('vi', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     global mydict
     config = ConfigParser.ConfigParser()
