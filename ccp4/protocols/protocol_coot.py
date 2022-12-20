@@ -763,7 +763,7 @@ def createScriptFile(imol,  # problem PDB id
     f.write("\n#load Atomic Structures\n")  # problem atomic structure must be
     for pdb in listOfAtomStructs:
         f.write("read_pdb('%s')\n" % pdb) #
-        f.write("set_mol_active(%d, %d)\n" % (imol_counter, imol_counter > 0))
+        f.write("set_mol_active(%d, %d)\n" % (imol_counter, imol_counter < 1))
         imol_counter += 1
 
     f.write("\n#load 3D maps\n")
