@@ -722,7 +722,7 @@ def getModels(outpuDataBaseNameWithLabels, table_name):
 
     c.execute("""SELECT fileName 
                  FROM %s  NATURAL JOIN lastid
-                 WHERE type = %d""" %
+                 WHERE type = %d ORDER BY id desc""" %
               (table_name, TYPE_ATOMSTRUCT))
 
     listOfAtomStructs = []
