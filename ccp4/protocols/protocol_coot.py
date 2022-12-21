@@ -445,7 +445,8 @@ the pdb file from coot  to scipion '
 
 cootScriptHeader = '''import ConfigParser
 import os
-from subprocess import call
+import subprocess
+import coot_python
 mydict={{}}
 mydict['imol']={imol}
 mydict['aa_main_chain']="A"
@@ -469,7 +470,7 @@ def beep(time):
       installed"""
    try:
       command = "play --no-show-progress -n synth %f sin 880"%time
-      print command
+      # print command
       os.system(command)
    except:
       pass
@@ -518,6 +519,12 @@ def _updateMol():
     aaNumber: 82
     step: 15
     called protocolDirectory/extra/coot.ini"""
+
+    def open_xdg(my_file):
+        """open text file with default editor
+        """
+        p=subprocess.Popen(('xdg-open', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    open_xdg(os.environ.get('COOT_INI',cootPath))
     global mydict
     config = ConfigParser.ConfigParser()
     config.read(os.environ.get('COOT_INI',cootPath))
@@ -577,12 +584,19 @@ def storeFileNameDataBase(imol, outFileName, outLabel=None, type=TYPE_ATOMSTRUCT
     # close connection
     conn.close()
 
-def _write(imol=0, outLabel=None):
+def _write(imol=-1, outLabel=None):
     """write pdb file, default names
        can be overwritted using coot.ini"""
+    global mydict
+    aa_imol = imol
+    if imol == -1:
+        with UsingActiveAtom() as [aa_imol, aa_chain_id, aa_res_no, aa_ins_code, aa_atom_name, aa_alt_conf]:
+            print("saving last active molecule with #ID", aa_imol)
+
     dic = dict(mydict)
-    outFileName=getOutPutFileName(dic['outfile'], imol)
-    
+    dic['imol'] = aa_imol
+    outFileName=getOutPutFileName(dic['outfile'], aa_imol)
+
     if outLabel is None:
         outLabel = os.path.splitext(os.path.basename(outFileName))[0]
     # else:
@@ -592,20 +606,16 @@ def _write(imol=0, outLabel=None):
     #    outFileName = os.path.join(dir, basename + ext)
     
     dic['outfile'] = outFileName
-    # command = "write_pdb_file(%(imol)s,'%(outfile)s')"%dic
-    # command = "save_coordinates(%(imol)s,'%(outfile)s')"%dic
-    # eval (doIt)  is not needed
     save_coordinates(dic['imol'], outFileName)
-    # result = doIt(command)
     
     if os.path.isfile(outFileName):
         type = TYPE_ATOMSTRUCT
         storeFileNameDataBase(imol, outFileName, outLabel, type)
-        add_status_bar_text("Saved file " + outFileName)
+        add_status_bar_text("Saved imol: %(imol)s as %(outfile)s" % dic)
     else:
         add_status_bar_text("I do not know how to export a 3D map. File NOT saved.")
         dic['outfile'] = outFileName.replace(".pdb", ".mrc")
-        command = "export_map(%(imol)s,'%(outfile)s')"%dic
+        command = "export_map(%(imol)s,'%(outfile)s')" % dic
         # TODO: the file is saved but it is not
         # clear how to handle it
         # No Scipion object will be created
@@ -617,7 +627,8 @@ def _write(imol=0, outLabel=None):
 
 def scipion_write(imol=0, outLabel=None):
     """scipion utility for writting files
-    args: model number, 0 by default"""
+    args: model number, 0 by default.
+    This function is use for python scripts"""
     global mydict
     mydict['imol']=imol
     _write(imol, outLabel)
@@ -633,11 +644,23 @@ def _printEnv():
 
 def _finishProj():
     global mydict
-    filenName = mydict['outfile']%(1,1)
+    filenName = mydict['outfile']%(1,1,1)
     dirPath = os.path.dirname(filenName)
     fileName = os.path.join(dirPath,"STOPPROTCOL")
     open(fileName,"w").close()
     beep(0.1)
+    coot_real_exit(0)
+
+
+# create scipion menu
+print("Loading Scipion Coot extensions...")
+
+menubar = coot_python.main_menubar()
+toolbar = coot_python.main_toolbar()
+menu = coot_menubar_menu("Scipion")
+add_simple_coot_menu_menuitem(menu, "write last active model", lambda func: _write(imol = -1))
+add_simple_coot_menu_menuitem(menu, "end protocol", lambda func: _finishProj())
+add_simple_coot_menu_menuitem(menu, "update cootini", lambda func: _updateMol())
 
 #change chain id
 add_key_binding("change_chain_id_down","x", lambda: _change_chain_id(-1))
@@ -683,7 +706,7 @@ def getModels(outpuDataBaseNameWithLabels, table_name):
 
     c.execute("""SELECT fileName 
                  FROM %s  NATURAL JOIN lastid
-                 WHERE type = %d""" %
+                 WHERE type = %d """ %
               (table_name, TYPE_ATOMSTRUCT))
 
     listOfAtomStructs = []
@@ -720,13 +743,20 @@ def createScriptFile(imol,  # problem PDB id
     f.write(cootScriptBody)
 
     # load PDB and MAP
+    imol_counter = 0
     f.write("\n#load Atomic Structures\n")  # problem atomic structure must be
     for pdb in listOfAtomStructs:
         f.write("read_pdb('%s')\n" % pdb) #
+        f.write("set_mol_active(%d, %d)\n" % (imol_counter, imol_counter < 1))
+        imol_counter += 1
 
     f.write("\n#load 3D maps\n")
+    f.write("map_colour = (0.0, 0.5, 1.0)\n")
     for vol in listOfMaps:
         f.write("handle_read_ccp4_map('%s', 0)\n" % vol)
+        #imol_counter += 1
+    # set color of first map
+    f.write(f"set_map_colour({imol_counter}, *map_colour)\n")
 
     f.write("\n#Extra Commands\n")
     f.write(extraCommands)

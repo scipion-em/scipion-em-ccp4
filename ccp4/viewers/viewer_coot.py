@@ -51,7 +51,7 @@ class CootRefineViewer(Viewer):
         bildFileName = os.path.abspath(self.protocol._getExtraPath("axis.bild"))
         dims = []
         samplings = []
-        if len(self.protocol.inputVolumes) is 0:
+        if len(self.protocol.inputVolumes) == 0:
             if self.protocol.pdbFileToBeRefined.get().getVolume() is not None:
                 dim = self.protocol.pdbFileToBeRefined.get().getVolume().getDim()[0]
                 sampling = self.protocol.pdbFileToBeRefined.get().getVolume().\
@@ -82,7 +82,7 @@ class CootRefineViewer(Viewer):
         f.write("cofr 0,0,0\n")
 
         outputsVol = []
-        if len(self.protocol.inputVolumes) is 0:
+        if len(self.protocol.inputVolumes) == 0:
             if self.protocol.pdbFileToBeRefined.get().getVolume() is not None:
                 outputVol = self.protocol.pdbFileToBeRefined.get().getVolume()
                 outputsVol.append(outputVol)
