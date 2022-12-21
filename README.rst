@@ -96,3 +96,8 @@ Status production version:
 
 .. image:: http://scipion-test.cnb.csic.es:9980/badges/ccp4_prod.svg
 
+Version in Pypi
+
+.. image:: https://img.shields.io/pypi/v/scipion-em-ccp4.svg
+        :target: https://pypi.python.org/pypi/scipion-em-ccp4
+        :alt: PyPI release
