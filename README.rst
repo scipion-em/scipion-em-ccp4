@@ -15,7 +15,7 @@ Programs from CCP4 included in the Scipion framework for model building:
 Install this plugin
 ===================
 
-You will need to use `2.0.0 <https://github.com/I2PC/scipion/releases/tag/v2.0>`_ version of Scipion to run these protocols. To install the plugin, you have two options:
+You will need to use `3.0.0 <https://github.com/I2PC/scipion/releases/tag/v3.0>`_ version of Scipion (o latter) to run these protocols. To install the plugin, you have two options:
 
 - **Stable version**  
 
@@ -76,13 +76,11 @@ Protocols
 
 
 
-
 ========
 Examples
 ========
 
 See `Model Building Tutorial <https://github.com/I2PC/scipion/wiki/tutorials/tutorial_model_building_basic.pdf>`_
-
 
 
 
@@ -98,3 +96,8 @@ Status production version:
 
 .. image:: http://scipion-test.cnb.csic.es:9980/badges/ccp4_prod.svg
 
+Version in Pypi
+
+.. image:: https://img.shields.io/pypi/v/scipion-em-ccp4.svg
+        :target: https://pypi.python.org/pypi/scipion-em-ccp4
+        :alt: PyPI release
