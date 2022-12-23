@@ -66,7 +66,8 @@ the pdb file from coot  to scipion '
     _program = ""
     _version = VERSION_1_2
     COOT = CCP4_BINARIES['COOT']
-    COOTINI='coot.ini'
+    COOTINI='coot.txt'
+    EDITOR='editor.py'
 
     # --------------------------- DEFINE param functions -------------------
     def _defineParams(self, form):
@@ -259,6 +260,7 @@ the pdb file from coot  to scipion '
                                                                       # fro newPDBs
                          self.extraCommands.get(),
                          self._getExtraPath(self.COOTINI),  # coot.ini
+                         self._getExtraPath(self.EDITOR),   # editor.py
                          databasePath,
                          table_name=DATABASETABLENAME,
                          protId=self.getObjId()
@@ -447,6 +449,7 @@ cootScriptHeader = '''import ConfigParser
 import os
 import subprocess
 import coot_python
+
 mydict={{}}
 mydict['imol']={imol}
 mydict['aa_main_chain']="A"
@@ -455,6 +458,7 @@ mydict['aaNumber']=17
 mydict['step']=5
 mydict['outfile'] = '{templateNameAtomStruct}'
 cootPath='{cootFileName}'
+editorPath='{editorFileName}'
 databasePath='{outpuDataBaseNameWithLabels}'
 table_name = '{table_name}'
 TYPE_3DMAP = {TYPE_3DMAP}
@@ -521,13 +525,16 @@ def _updateMol():
     called protocolDirectory/extra/coot.ini"""
 
     def open_xdg(my_file):
-        """open text file with default editor
+        """open text file with default editor. I tried xdg-open but it
+        does not work.
+        
         """
-        p=subprocess.Popen(('xdg-open', my_file), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    open_xdg(os.environ.get('COOT_INI',cootPath))
+        # unset are need otherwise python ccp4 and python scipion are mixed
+        os.system("unset PYTHONPATH; unset PYTHONHOME; python %s %s" % (editorPath, my_file))
+    open_xdg(os.environ.get('COOT_INI', cootPath))
     global mydict
     config = ConfigParser.ConfigParser()
-    config.read(os.environ.get('COOT_INI',cootPath))
+    config.read(os.environ.get('COOT_INI', cootPath))
     try:
         mydict['imol']               = int(config.get("myvars", "imol"))
         mydict['aa_main_chain']      = config.get("myvars", "aa_main_chain")
@@ -721,6 +728,7 @@ def createScriptFile(imol,  # problem PDB id
                                        # end of the file
                                        # mainly used for testing
                      cootFileName='/tmp/coot.ini',
+                     editorFileName='/tmp/editor.py',
                      outpuDataBaseNameWithLabels='output.db',
                      table_name='pdb',
                      protId=0
@@ -733,6 +741,7 @@ def createScriptFile(imol,  # problem PDB id
     d = {'imol':imol,
          'templateNameAtomStruct':templateNameAtomStruct,
          'cootFileName':cootFileName,
+         'editorFileName':editorFileName,
          'outpuDataBaseNameWithLabels':outpuDataBaseNameWithLabels,
          'table_name':table_name,
          'TYPE_3DMAP':TYPE_3DMAP,
@@ -776,8 +785,83 @@ aaNumber: 100
 step: 10
 """)
         f.close()
+    # create editor if it does not exist
+    if os.path.exists(editorFileName):
+        pass
+    else:
+        f = open(editorFileName,"w")
+        f.write("""#
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+import sys
+    
+# save current file
+def save_file():
+    # try to get current file path
+    try:
+        # get file path from window title
+        path = main_window.title().split('-')[1][1:]
+    
+    # init path variable to empty string on exception
+    except:
+        print('Unexpected error:', sys.exc_info()[0])
+
+    # check if file path is available
+    if path != '':
+        # write file
+        with open(path, 'w') as f:
+            content = text_area.get('1.0', tk.END)
+            f.write(content)
+                
+    # clear 'is_modified' flag
+    text_area.edit_modified(0)
 
 
+# create main window instance
+main_window = tk.Tk()
+
+# configure main window
+main_window.title('Notepad')
+main_window.geometry('800x600')
+
+# create menu bar instance
+menubar = tk.Menu(main_window)
+
+# create 'File' menu items
+file_menu = tk.Menu(menubar, tearoff=0)
+file_menu.add_command(label="Save", command=save_file)
+file_menu.add_command(label="Exit", command=main_window.quit)
+
+# add 'File' menu to the menu bar
+menubar.add_cascade(label="File", menu=file_menu)
+
+# create text area to input text
+text_area = tk.Text(main_window)
+text_area.pack(expand = tk.YES, fill = tk.BOTH, side = tk.LEFT)
+
+# create scrollbar and link it to the text area
+scroll_bar = ttk.Scrollbar(main_window, orient=tk.VERTICAL, command=text_area.yview)
+scroll_bar.pack(fill=tk.Y, side=tk.RIGHT)
+text_area['yscrollcommand'] = scroll_bar.set
+
+# Connect menubar to the window
+main_window.config(menu=menubar)
+
+# run main application loop
+path = sys.argv[1]
+main_window.title('Notepad - ' + path)
+with open(path, 'r') as f:
+    # clear text area and insert file content
+    content = f.read()
+    text_area.delete('1.0', tk.END)
+    text_area.insert('1.0', content)
+    # clear 'is_modified' flag
+    text_area.edit_modified(0)
+
+tk.mainloop()
+""")
+        f.close()
 def _checkTableExists(dbcon, tablename):
     dbcur = dbcon.cursor()
     dbcur.execute("""
