@@ -32,7 +32,7 @@ from ccp4.constants import *
 
 _references = ['Winn_2011']
 _logo = "ccp4_200.png"
-__version__ = "3.1.0"
+__version__ = "3.1.1"
 
 class Plugin(pwem.Plugin):
     _homeVar = CCP4_HOME_VARNAME

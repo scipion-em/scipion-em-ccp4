@@ -273,7 +273,7 @@ the pdb file from coot  to scipion '
             args += " --no-graphics "
         args += " --script " + self._getExtraPath(COOTSCRIPTFILENAME)
         if len(self.phythonscript.get()) > 1:
-            args += " --python {phythonscript}".format(
+            args += " --script {phythonscript}".format(
                 phythonscript=self.phythonscript.get())
         # script with auxiliary files
         self._log.info('Launching: ' + Plugin.getProgram(self.COOT) + ' ' + args)
