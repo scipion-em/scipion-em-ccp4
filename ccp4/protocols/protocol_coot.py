@@ -448,8 +448,12 @@ the pdb file from coot  to scipion '
 cootScriptHeader = '''import ConfigParser
 import os
 import subprocess
-import coot_python
-
+try:
+    import coot_python
+    has_gui = True
+except:
+    print("ERROR: coot_python module not found. If you are running in no gui mode this is OK")
+    has_gui = False
 mydict={{}}
 mydict['imol']={imol}
 mydict['aa_main_chain']="A"
@@ -662,12 +666,13 @@ def _finishProj():
 # create scipion menu
 print("Loading Scipion Coot extensions...")
 
-menubar = coot_python.main_menubar()
-toolbar = coot_python.main_toolbar()
-menu = coot_menubar_menu("Scipion")
-add_simple_coot_menu_menuitem(menu, "write last active model", lambda func: _write(imol = -1))
-add_simple_coot_menu_menuitem(menu, "end protocol", lambda func: _finishProj())
-add_simple_coot_menu_menuitem(menu, "update cootini", lambda func: _updateMol())
+if has_gui: 
+    menubar = coot_python.main_menubar()
+    toolbar = coot_python.main_toolbar()
+    menu = coot_menubar_menu("Scipion")
+    add_simple_coot_menu_menuitem(menu, "write last active model", lambda func: _write(imol = -1))
+    add_simple_coot_menu_menuitem(menu, "end protocol", lambda func: _finishProj())
+    add_simple_coot_menu_menuitem(menu, "update cootini", lambda func: _updateMol())
 
 #change chain id
 add_key_binding("change_chain_id_down","x", lambda: _change_chain_id(-1))
