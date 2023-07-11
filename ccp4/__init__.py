@@ -131,14 +131,14 @@ class Plugin(pwem.Plugin):
             'MMCIFDIC': os.path.join(_ccp4_home, 'lib', 'cif_mmdic.lib'),
             # # CLIBD_MON: dictionary files for REFMAC5 (keep trailing /)
             # export CLIBD_MON=$CCP4/lib/data/monomers/
-            'CLIBD_MON': os.path.join(_ccp4_home, 'lib', 'data', 'monomers'),
+            'CLIBD_MON': os.path.join(_ccp4_home, 'lib', 'data', 'monomers/'),
             # # CRANK: location of Crank automation suite within ccp4i
             # export CRANK=$CCP4I_TOP/crank
             'CRANK': os.path.join(_ccp4_home, 'crank'),
             # # CCP4_HELPDIR: location of the VMS-style help file used
             # # by (ip)mosflm
             # export CCP4_HELPDIR=$CCP4/help/            # NB trailing /
-            'CCP4_HELPDIR': os.path.join(_ccp4_home, 'help'),
+            'CCP4_HELPDIR': os.path.join(_ccp4_home, 'help/'),
         }, position=pwutils.Environ.REPLACE)  # replace
 
         return environ
