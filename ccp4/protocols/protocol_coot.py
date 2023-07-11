@@ -279,7 +279,14 @@ the pdb file from coot  to scipion '
         self._log.info('Launching: ' + Plugin.getProgram(self.COOT) + ' ' + args)
 
         # run in the background
-        runCCP4Program(Plugin.getProgram(self.COOT), args)
+        try:
+            runCCP4Program(Plugin.getProgram(self.COOT), args)
+        except Exception as e:
+            print(pwutils.redStr("=============================================================="))
+            print(pwutils.redStr("ERROR: Coot execution failed"))
+            print(pwutils.redStr("Last SAVED atomic model will be shown if protocol is continued"))
+            print(pwutils.redStr("=============================================================="))
+ 
         self.createOutput()
 
     def createOutput(self):
