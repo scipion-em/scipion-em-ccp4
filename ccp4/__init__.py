@@ -30,6 +30,8 @@ import getpass
 
 from ccp4.constants import *
 
+from pyworkflow import MODELLING
+
 _references = ['Winn_2011']
 _logo = "ccp4_200.png"
 __version__ = "3.2.0"
@@ -37,6 +39,7 @@ __version__ = "3.2.0"
 class Plugin(pwem.Plugin):
     _homeVar = CCP4_HOME_VARNAME
     _versions = {'CCP4': [V7_0]}
+    _processingField = [MODELLING]
 
     @classmethod
     def _defineVariables(cls):
