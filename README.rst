@@ -82,7 +82,11 @@ Examples
 
 See `Model Building Tutorial <https://scipion-em.github.io/docs/release-3.0.0/docs/user/user-documentation.html#model-building>`_
 
+========================
+Problem compiling maxit?
+========================
 
+Check https://github.com/scipion-em/scipion-em-atomstructutils?tab=readme-ov-file#problem-compiling-maxit
 
 ===============
 Buildbot status
