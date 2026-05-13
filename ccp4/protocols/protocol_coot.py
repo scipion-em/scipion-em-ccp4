@@ -57,11 +57,186 @@ TYPE_ATOMSTRUCT = 1
 
 
 class CootRefine(EMProtocol):
-    """Coot is an interactive graphical application for
-macromolecular model building, model completion
-and validation. IMPORTANT: press "w" in coot to transfer
-the pdb file from coot  to scipion '
-"""
+    """
+    Interactive refinement and correction environment for macromolecular
+    atomic models guided by cryo-EM density maps. The protocol enables
+    users to inspect, modify, validate, and iteratively improve structural
+    models within a graphical molecular interpretation workflow.
+
+    AI Generated:
+
+    Coot Refinement (CootRefine) - User Manual
+        Overview
+
+        The Coot Refinement protocol provides an interactive environment for
+        manual and semi-automatic refinement of macromolecular atomic models
+        against cryo-EM density maps. Its main purpose is to help users improve
+        structural interpretation by visually inspecting the agreement between
+        the experimental density and the current atomic model while allowing
+        direct editing and local rebuilding of problematic regions.
+
+        In cryo-EM workflows, automated refinement procedures often produce
+        models that still require human inspection. Flexible loops, side-chain
+        conformations, poorly resolved segments, and local sequence assignment
+        errors frequently need expert intervention. This protocol integrates
+        the Coot molecular graphics system into Scipion-oriented workflows so
+        that model correction, rebuilding, and validation can be performed in
+        an iterative and biologically meaningful manner.
+
+        Biological Context and Typical Applications
+
+        Structural refinement is not simply a geometric optimization process.
+        The biological interpretation of a cryo-EM structure strongly depends
+        on the quality of the fitted atomic model. Small tracing errors may
+        alter conclusions regarding ligand binding, catalytic mechanisms,
+        conformational states, or intermolecular interfaces.
+
+        This protocol is especially useful after automated fitting or
+        refinement stages, when the user needs to manually inspect uncertain
+        regions. Typical applications include rebuilding flexible loops,
+        correcting backbone tracing, improving side-chain placement, refining
+        domain interfaces, adjusting chain assignments, or validating local
+        geometry in medium- or high-resolution reconstructions.
+
+        The protocol also supports comparative interpretation workflows in
+        which multiple reference structures are loaded together with one or
+        more cryo-EM maps. This allows users to compare conformations, inspect
+        structural variability, or transfer biological interpretation from
+        related structures.
+
+        Input Maps and Atomic Structures
+
+        The protocol accepts one or more cryo-EM density maps together with a
+        principal atomic structure that will be refined interactively. Optional
+        auxiliary atomic models can also be loaded as references. These
+        reference structures are useful for comparative modeling, domain
+        placement, conformational analysis, or rebuilding poorly resolved
+        regions using homologous structures as guides.
+
+        When several maps are provided, users can visually compare different
+        reconstructions or focus refinement on maps generated under different
+        processing strategies. This becomes particularly valuable when working
+        with flexible systems, multi-state reconstructions, or local refinement
+        approaches.
+
+        Density Map Normalization
+
+        The protocol optionally normalizes input maps before visualization.
+        This step is important because molecular graphics tools often expect
+        density values within stable intensity ranges. Proper normalization
+        improves contour visualization, map interpretation, and local fitting
+        behavior.
+
+        In biological practice, normalization is especially useful when maps
+        originate from heterogeneous processing pipelines or when density
+        amplitudes vary significantly between reconstructions. Consistent map
+        scaling facilitates visual comparison and reduces ambiguity during
+        model rebuilding.
+
+        Interactive Refinement Workflow
+
+        The refinement process is intentionally interactive and user driven.
+        Users inspect the density map, evaluate the local agreement between
+        the map and the model, and manually apply corrections where necessary.
+        This workflow is particularly important in cryo-EM because flexible or
+        poorly resolved regions frequently require expert interpretation beyond
+        what automated refinement algorithms can reliably provide.
+
+        The protocol supports iterative correction cycles in which the model
+        can be repeatedly edited, refined, and exported back into the Scipion
+        workflow. This allows refinement to become part of a larger structural
+        analysis strategy that may include validation, classification,
+        comparison of conformational states, or additional automated refinement
+        stages.
+
+        Chain Navigation and Segment Refinement
+
+        The protocol incorporates tools that facilitate rapid navigation across
+        chains and residue ranges during interactive sessions. This is
+        especially useful when refining large macromolecular assemblies,
+        ribosomes, membrane complexes, or multi-chain protein systems.
+
+        Segment-oriented refinement workflows allow users to focus on local
+        regions of interest instead of refining the entire structure at once.
+        From a biological perspective, local rebuilding is often preferable
+        because many cryo-EM maps contain regions with variable local
+        resolution. Stable cores may already be correct while flexible loops,
+        interfaces, or peripheral domains require additional attention.
+
+        The protocol also supports iterative traversal through amino acid
+        segments, enabling users to systematically inspect and refine extended
+        regions of the structure in a controlled and reproducible manner.
+
+        Model Tracking and Data Management
+
+        An important aspect of the protocol is the management of intermediate
+        structural states generated during refinement. Multiple versions of the
+        model can be produced throughout the interactive session, allowing
+        users to preserve refinement history and recover previous structural
+        states if necessary.
+
+        This traceability is biologically important because refinement is often
+        exploratory. Users may test alternative interpretations for ambiguous
+        regions, compare different backbone traces, or evaluate multiple
+        conformational hypotheses before selecting the final biologically
+        meaningful model.
+
+        Integration With Validation Workflows
+
+        The protocol is designed to work together with downstream validation
+        and refinement tools commonly used in structural biology workflows.
+        Interactive rebuilding is frequently followed by stereochemical
+        validation, real-space refinement, or comparison against independent
+        reconstructions.
+
+        In practical cryo-EM studies, users often alternate between automated
+        refinement and manual correction several times before obtaining a final
+        publication-quality model. This protocol acts as the human-guided
+        component of that iterative refinement cycle.
+
+        Outputs and Their Interpretation
+
+        The protocol produces refined atomic structures that preserve the
+        biological interpretation introduced during interactive editing.
+        Normalized maps generated during preprocessing may also be exported for
+        further visualization or downstream processing.
+
+        Because the refinement process is interactive, the final structural
+        quality depends strongly on the expertise of the user and on the local
+        interpretability of the density map. Users should always visually
+        inspect the agreement between density and model and complement manual
+        refinement with independent validation tools.
+
+        Practical Recommendations
+
+        In routine cryo-EM practice, it is advisable to begin refinement by
+        inspecting the global agreement between the model and the map before
+        focusing on local details. Large tracing errors or domain misplacements
+        should be corrected first because they can bias subsequent local
+        refinement.
+
+        Flexible loops and poorly resolved peripheral regions should be treated
+        conservatively. Over-interpretation of weak density may introduce
+        biologically misleading structural features. When uncertainty remains,
+        preserving simpler or partially unresolved models is often preferable
+        to introducing speculative coordinates.
+
+        Comparative reference structures are particularly valuable when working
+        at intermediate resolution. However, users should avoid forcing the map
+        to match an expected conformation if the experimental density suggests
+        genuine structural differences.
+
+        Final Perspective
+
+        Interactive refinement remains one of the most biologically important
+        stages of cryo-EM structural interpretation. Although automated methods
+        continue to improve, expert-guided rebuilding is still essential for
+        resolving ambiguous regions, validating biological plausibility, and
+        ensuring that the final structural model accurately reflects the
+        experimental data. This protocol provides a flexible environment for
+        integrating human expertise into iterative cryo-EM model refinement
+        workflows.
+    """
     _label = 'coot refinement'
     _program = ""
     _version = VERSION_1_2

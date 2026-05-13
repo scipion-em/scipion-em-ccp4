@@ -45,9 +45,194 @@ from pyworkflow.protocol.params import PointerParam, IntParam, FloatParam, \
 from ccp4.constants import CCP4_BINARIES
 
 class CCP4ProtRunRefmac(EMProtocol):
-    """ Automatic refinement program in Fourier space of macromolecule
-    structures regarding electron density maps. Generates files for
-    volumes and FSCs to submit structures to EMDB
+    """
+    Performs automated Fourier-space refinement of atomic structures against
+    cryo-EM density maps using the CCP4 Refmac refinement framework. The
+    protocol improves the agreement between an experimental density map and
+    an atomic model while preserving chemically and geometrically meaningful
+    stereochemistry.
+
+    AI Generated:
+
+    Refmac Refinement (CCP4ProtRunRefmac) - User Manual
+        Overview
+
+        The Refmac refinement protocol is designed to optimize an atomic
+        structure so that it better matches an experimental cryo-EM density
+        map while maintaining realistic molecular geometry. In structural
+        biology workflows, this process is one of the final and most critical
+        stages before interpretation, validation, deposition, or publication.
+        The protocol combines information from the experimental map with
+        stereochemical restraints derived from established macromolecular
+        geometry, producing a refined structural model that is both
+        experimentally supported and biologically plausible.
+
+        In practical cryo-EM analysis, refinement becomes necessary after an
+        initial model has been fitted into a density map. Although rigid-body
+        fitting or interactive modeling can place the structure approximately
+        into the correct position, refinement is required to optimize bond
+        lengths, bond angles, local conformations, and global agreement with
+        the density. This step is especially important for medium-resolution
+        cryo-EM maps where local ambiguities may still exist.
+
+        Inputs and Biological Context
+
+        The protocol requires an input atomic structure together with an
+        associated cryo-EM density map. The density map defines the
+        experimental evidence, while the atomic structure represents the
+        current interpretation of that evidence. Ideally, the structure should
+        already be approximately fitted into the map before refinement begins.
+
+        The quality of the starting model strongly influences the final
+        outcome. Large tracing errors, incorrect chain assignments, or major
+        conformational mismatches cannot usually be corrected automatically by
+        refinement alone. Therefore, users should visually inspect the model
+        beforehand and correct major issues prior to running the protocol.
+
+        Resolution Limits and Their Interpretation
+
+        The refinement process operates within a selected resolution range.
+        The maximum resolution parameter determines the highest spatial detail
+        included during refinement. Biologically, this value should reflect
+        the true information content of the cryo-EM reconstruction rather than
+        the nominal reported resolution alone.
+
+        Using overly optimistic high-resolution limits may force the protocol
+        to fit noise rather than meaningful structural features. Conversely,
+        overly conservative limits may prevent the refinement from taking
+        advantage of genuine high-resolution information present in the map.
+        A practical recommendation is to choose a resolution slightly more
+        conservative than the best reported global resolution unless local map
+        quality is uniformly excellent.
+
+        The minimum resolution parameter controls the low-resolution limit.
+        In most cryo-EM workflows, the default values are sufficient because
+        low-frequency information is generally stable and contributes mainly
+        to overall shape agreement.
+
+        Masked Volume Generation
+
+        The protocol can optionally generate a masked density volume around
+        the molecular region. This is biologically important because solvent
+        noise and unrelated density regions can negatively influence
+        refinement stability. By focusing refinement on the region surrounding
+        the macromolecule, the protocol improves the signal-to-noise ratio and
+        enhances the relevance of the map contribution.
+
+        The masking process is particularly useful for large assemblies,
+        membrane proteins, flexible complexes, or maps containing substantial
+        background density. In these situations, restricting refinement to the
+        biologically meaningful region often improves convergence and reduces
+        overfitting.
+
+        Parameters controlling the mask radius determine how far the retained
+        density extends around the atomic model. Smaller values focus more
+        tightly on the structure, while larger values preserve more contextual
+        density. Excessively restrictive masking may eliminate meaningful
+        flexible regions, whereas overly broad masks may reintroduce solvent
+        noise.
+
+        Refinement Cycles and Convergence
+
+        The number of refinement cycles controls how extensively the model is
+        optimized. In many routine cryo-EM workflows, moderate cycle counts
+        are sufficient to achieve stable convergence. Increasing the number of
+        cycles may slightly improve agreement statistics, but excessive
+        refinement risks fitting noise or amplifying local modeling errors.
+
+        Biological users should interpret refinement as a balance between map
+        agreement and stereochemical realism. Better numerical agreement alone
+        does not necessarily imply a more reliable biological model. Visual
+        inspection and independent validation remain essential.
+
+        Weighting Between Geometry and Density
+
+        One of the most important concepts in refinement is the balance
+        between experimental density and chemical restraints. The weighting
+        parameter determines how strongly the refinement follows the map
+        relative to ideal molecular geometry.
+
+        Lower weighting values prioritize stereochemical correctness, which is
+        often beneficial for lower-resolution maps where density features are
+        ambiguous. Higher weighting values emphasize map agreement more
+        strongly, which may be appropriate for very high-quality maps with
+        clear side-chain detail.
+
+        In most practical situations, automatic weighting provides reliable
+        behavior and is recommended unless the user has strong prior
+        experience with refinement optimization.
+
+        B Factors and Atomic Mobility
+
+        The protocol allows initialization of atomic displacement parameters,
+        commonly referred to as B factors. Biologically, B factors reflect
+        local mobility, uncertainty, or disorder within the structure. Proper
+        initialization can improve refinement stability, especially when the
+        starting model lacks meaningful displacement parameters.
+
+        Flexible loops, mobile domains, and poorly resolved peripheral regions
+        often exhibit elevated B factors after refinement. Users should
+        interpret these regions cautiously because high mobility may indicate
+        genuine conformational flexibility or limited local resolution.
+
+        Extra Refinement Parameters
+
+        Advanced users may provide additional Refmac parameters to customize
+        refinement behavior. This capability is particularly useful in
+        specialized structural biology scenarios such as hydrogen treatment,
+        custom stereochemical restraints, ligand refinement, or experimental
+        optimization strategies.
+
+        Although these advanced options provide flexibility, they should be
+        used carefully because inappropriate refinement settings can reduce
+        model quality or generate biologically misleading results.
+
+        Outputs and Validation
+
+        The primary output is a refined atomic structure with improved
+        agreement to the cryo-EM density map. This refined model is suitable
+        for downstream structural interpretation, visualization, validation,
+        and deposition.
+
+        The protocol also generates refinement statistics that help evaluate
+        model quality. Parameters such as R factors and stereochemical
+        deviations provide insight into how well the structure agrees with the
+        experimental data while preserving chemically realistic geometry.
+
+        These values should always be interpreted together rather than
+        individually. A biologically reliable structure requires both good map
+        agreement and acceptable stereochemistry. Improvement in one metric at
+        the expense of severe deterioration in another usually indicates
+        overfitting or instability.
+
+        Practical Recommendations
+
+        In routine cryo-EM refinement workflows, it is generally advisable to
+        begin with automatic weighting and moderate refinement cycles. If the
+        resulting structure shows unrealistic geometry, stronger geometric
+        restraints may be needed. If the model appears underfit despite good
+        map quality, increasing the influence of the density map may improve
+        local agreement.
+
+        For flexible or heterogeneous assemblies, masked refinement is often
+        highly beneficial because it limits the influence of noisy solvent
+        regions. In membrane proteins or multi-domain complexes, careful
+        masking frequently produces more stable and biologically meaningful
+        refinement behavior.
+
+        Users should always visually inspect refined structures together with
+        the density map. Automated refinement can improve local accuracy, but
+        biological interpretation still depends on expert evaluation of map
+        quality, conformational plausibility, and structural consistency.
+
+        Final Perspective
+
+        Refinement is not simply a numerical optimization procedure but a
+        biologically meaningful step that defines the final structural model
+        used for mechanistic interpretation and scientific conclusions.
+        Successful refinement depends on balancing experimental evidence with
+        realistic molecular geometry while maintaining awareness of map
+        resolution, structural heterogeneity, and local uncertainty.
     """
     _label = 'refmac'
     _program = ""
