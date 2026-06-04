@@ -40,11 +40,12 @@ from pyworkflow.protocol.params import (MultiPointerParam, PointerParam,
 from pyworkflow.utils.properties import Message
 from ccp4.constants import CCP4_BINARIES
 import sqlite3
+from pwem import Domain
 
 
 # template for new atomic models, first ID is the coot model id
 # the second id increases for each time the model is saved
-COOTPDBTEMPLATEFILENAME = "coot_%06d_Imol_%04d_version_%04d.pdb" # protId, modelID, counter
+COOTPDBTEMPLATEFILENAME = "coot_%06d_Imol_%04d_version_%04d.cif" # protId, modelID, counter
 # filename for coot script file
 COOTSCRIPTFILENAME = "cootScript.py"
 # database that stores filenames and corresponding models
@@ -307,6 +308,7 @@ the pdb file from coot  to scipion '
         c.execute('SELECT fileName, labelName '
                   'FROM %s '
                   'WHERE saved = 0 AND type=%d' % (DATABASETABLENAME, TYPE_ATOMSTRUCT))
+        chimeraPlugin = Domain.importFromPlugin('chimera', 'Plugin', doRaise=True)
         for row in c:
             pdbFileName = row[0]
             pdbLabelName = row[1]
@@ -316,6 +318,17 @@ the pdb file from coot  to scipion '
             outputs = {str(pdbLabelName) : pdb}
             self._defineOutputs(**outputs)
             self._defineSourceRelation(self.inputPdbFiles, pdb)
+            # convert outfiles using cif
+            cmdPath = os.path.abspath(self._getExtraPath("command.cxc"))
+            f = open(cmdPath, "w")
+            f.write(f"open {pdbFileName}\n")
+            f.write(f"save {pdbFileName}\n")
+            f.write("exit\n")
+            f.close()
+
+            args = f'--nogui --script {cmdPath}'
+            chimeraPlugin.runChimeraProgram(chimeraPlugin.getProgram(), args)
+
 
         # files has been saved
         sql = 'UPDATE %s SET saved = 1 WHERE saved=0 ' \
@@ -632,7 +645,7 @@ def _write(imol=-1, outLabel=None):
         add_status_bar_text("Saved imol: %(imol)s as %(outfile)s" % dic)
     else:
         add_status_bar_text("I do not know how to export a 3D map. File NOT saved.")
-        dic['outfile'] = outFileName.replace(".pdb", ".mrc")
+        dic['outfile'] = outFileName.replace(".cif", ".mrc")
         command = "export_map(%(imol)s,'%(outfile)s')" % dic
         # TODO: the file is saved but it is not
         # clear how to handle it
