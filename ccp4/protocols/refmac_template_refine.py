@@ -25,6 +25,7 @@
 # *  e-mail address 'scipion@cnb.csic.es'
 # *
 # **************************************************************************
+
 template_refmac_header="""#!/bin/sh
 # This  script will run REFMAC for a model against an EM map. 
 # # 
